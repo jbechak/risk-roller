@@ -79,3 +79,9 @@ function toggleShow() {
   currentNumber.value = 0;
 }
 </script>
+
+<style scoped>
+div:hover {
+  cursor: pointer;
+}
+</style>

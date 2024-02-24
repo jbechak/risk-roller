@@ -44,6 +44,6 @@ function getDieValue(value, isRed) {
 
 <style scoped>
 .home {
-  width: 500px;
+  width: 400px;
 }
 </style>
