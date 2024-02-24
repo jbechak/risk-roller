@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-3">
+  <div class="mx-3" :class="isTogglable ? styleClasses.POINTER_ON_HOVER : null">
     <img :class="isActive ? null : styleClasses.OPACITY_25" :src="currentDieRef" :style="styles.rotate" @click="toggleShow" />
   </div>
 </template>
@@ -43,7 +43,8 @@ const currentDieRef = computed(() =>
 
 const currentNumber = ref(0);
 const styleClasses = {
-  OPACITY_25: "opacity-25"
+  OPACITY_25: "opacity-25",
+  POINTER_ON_HOVER: "pointer-on-hover"
 };
 
 const styles = reactive({
@@ -75,13 +76,14 @@ async function delay(time) {
 }
 
 function toggleShow() {
+  if (!props.isTogglable) return;
   isActive.value = !isActive.value;
   currentNumber.value = 0;
 }
 </script>
 
 <style scoped>
-div:hover {
+.pointer-on-hover {
   cursor: pointer;
 }
 </style>

@@ -1,12 +1,12 @@
 <template>
   <div class="home">
     <div class="d-flex my-5">
-      <DieComponent ref="redDie1" @change="getDieValue"/>
+      <DieComponent ref="redDie1" :isTogglable="false" @change="getDieValue"/>
       <DieComponent ref="redDie2" @change="getDieValue"/>
       <DieComponent ref="redDie3" @change="getDieValue"/>
     </div>
     <div class="d-flex my-5">
-      <DieComponent ref="whiteDie1" :is-red="false" @change="getDieValue"/>
+      <DieComponent ref="whiteDie1" :isTogglable="false" :is-red="false" @change="getDieValue"/>
       <DieComponent ref="whiteDie2" :is-red="false" @change="getDieValue"/>
     </div>
     <button type="button" class="btn btn-primary pt-2" @click="rollDice"><h2>Roll</h2></button>
@@ -16,7 +16,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import DieComponent from '@/components/DieComponent.vue'
+import DieComponent from '@/components/DieComponent.vue';
+import { useVibrate } from '@vueuse/core';
+
+const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
+
 
 const redDie1 = ref(null);
 const redDie2 = ref(null);
@@ -33,6 +37,7 @@ const diceArray = ref([
 ]);
 
 async function rollDice() {
+  vibrate();
   diceArray.value.forEach((die) => die.value.rollDie());
 }
 
