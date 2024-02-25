@@ -1,13 +1,14 @@
 <template>
   <div class="home">
     <div class="d-flex my-5">
-      <DieComponent ref="redDie1" :isTogglable="false" @change="getDieValue"/>
-      <DieComponent ref="redDie2" @change="getDieValue"/>
-      <DieComponent ref="redDie3" @change="getDieValue"/>
+      <div v-for="die in redDice" :key="die.id">
+        <DieComponent ref="redDiceRef" :die="die" @change="getDieValue" @toggleShow="toggleShow"/>
+      </div>
     </div>
     <div class="d-flex my-5">
-      <DieComponent ref="whiteDie1" :isTogglable="false" :is-red="false" @change="getDieValue"/>
-      <DieComponent ref="whiteDie2" :is-red="false" @change="getDieValue"/>
+      <div v-for="die in whiteDice" :key="die.id">
+        <DieComponent ref="whiteDiceRef" :die="die" @change="getDieValue" @toggleShow="toggleShow"/>
+      </div>
     </div>
     <button type="button" class="btn btn-primary pt-2" @click="rollDice"><h2>Roll</h2></button>
 
@@ -21,34 +22,57 @@ import { useVibrate } from '@vueuse/core';
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 
+const redDiceRef = ref(null);
+const whiteDiceRef = ref(null);
 
-const redDie1 = ref(null);
-const redDie2 = ref(null);
-const redDie3 = ref(null);
-const whiteDie1 = ref(null);
-const whiteDie2 = ref(null);
+const redDice = ref([
+  { id: 1, isActive: true, isTogglable: true, isRed: true },
+  { id: 2, isActive: true, isTogglable: true, isRed: true },
+  { id: 3, isActive: true, isTogglable: true, isRed: true },
+]);
 
-const diceArray = ref([
-  redDie1, 
-  redDie2, 
-  redDie3, 
-  whiteDie1, 
-  whiteDie2, 
+const whiteDice = ref([
+  { id: 1, isActive: true, isTogglable: true, isRed: false },
+  { id: 2, isActive: true, isTogglable: true, isRed: false },
 ]);
 
 async function rollDice() {
   vibrate();
-  diceArray.value.forEach((die) => die.value.rollDie());
+  redDiceRef.value.forEach((die) => {
+    die.rollDie();
+  });
+  whiteDiceRef.value.forEach((die) => {
+    die.rollDie();
+  });
 }
 
 function getDieValue(value, isRed) {
   console.log(value, isRed);
 }
 
+function toggleShow(die) {
+  die.isActive = !die.isActive;
+  setToggable(die.isRed ? redDice.value : whiteDice.value);
+}
+
+function setToggable(dice) {
+  const activeDice = dice.filter((die) => die.isActive);
+  if (activeDice.length === 1) {
+    activeDice[0].isTogglable = false;
+  } else {
+    dice.forEach((die) => { if (!die.isTogglable) die.isTogglable = true })
+  }
+}
 </script>
 
 <style scoped>
 .home {
   width: 400px;
 }
+
+/* @media only screen and (min-width: 1400px) {
+  .home {
+    width: 400px;
+  }
+} */
 </style>

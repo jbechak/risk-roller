@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-3" :class="isTogglable ? styleClasses.POINTER_ON_HOVER : null">
-    <img :class="isActive ? null : styleClasses.OPACITY_25" :src="currentDieRef" :style="styles.rotate" @click="toggleShow" />
+  <div class="mx-3" :class="die?.isTogglable ? styleClasses.POINTER_ON_HOVER : null">
+    <img :class="die?.isActive ? null : styleClasses.OPACITY_25" :src="currentDieRef" :style="styles.rotate" @click="toggleShow" />
   </div>
 </template>
 
@@ -20,25 +20,19 @@ import whiteFive from '@/assets/WhiteFive.png';
 import whiteSix from '@/assets/WhiteSix.png';
 
 const props = defineProps({
-  isRed: {
-    type: Boolean,
-    default: true
+  die: {
+    type: Object,
+    default: null
   },
-  isTogglable: {
-    type: Boolean,
-    default: true
-  }
 });
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(['change', 'toggleShow']);
 defineExpose({ rollDie });
-
-const isActive = ref(true);
 
 const redDiceRef = ref([redOne, redTwo, redThree, redFour, redFive, redSix]);
 const whiteDiceRef = ref([whiteOne, whiteTwo, whiteThree, whiteFour, whiteFive, whiteSix]);
 const currentDieRef = computed(() =>
-  props.isRed ? redDiceRef.value[currentNumber.value] : whiteDiceRef.value[currentNumber.value]
+  props.die.isRed ? redDiceRef.value[currentNumber.value] : whiteDiceRef.value[currentNumber.value]
 );
 
 const currentNumber = ref(0);
@@ -52,14 +46,15 @@ const styles = reactive({
 });
 
 async function rollDie() {
-  if (isActive.value) {
+  if (props.die.isActive) {
     const maxAngle = 50
+    //const rollDuration = Math.floor(Math.random() * 6) + 2;
     for (let j = 0; j < 3; j++) {
       await rotateRange(1, (i) => i < maxAngle, 10);
       await rotateRange(maxAngle, (i) => i > 0 - maxAngle, -10);
       await rotateRange(0 - maxAngle, (i) => i < 1, 10);
     }
-    emit('change', currentNumber.value + 1, props.isRed);
+    emit('change', currentNumber.value + 1, props.die.isRed);
   }
 }
 
@@ -76,8 +71,8 @@ async function delay(time) {
 }
 
 function toggleShow() {
-  if (!props.isTogglable) return;
-  isActive.value = !isActive.value;
+  if (!props.die.isTogglable) return;
+  emit('toggleShow', props.die);
   currentNumber.value = 0;
 }
 </script>
