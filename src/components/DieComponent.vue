@@ -1,6 +1,11 @@
 <template>
   <div class="mx-3" :class="die?.isTogglable ? styleClasses.POINTER_ON_HOVER : null">
-    <img :class="die?.isActive ? null : styleClasses.OPACITY_25" :src="currentDieRef" :style="styles.rotate" @click="toggleShow" />
+    <img 
+      :class="die?.isActive ? null : styleClasses.OPACITY_25" 
+      :src="currentDieRef" 
+      :style="styles.rotate" 
+      @click="toggleShow" 
+    />
   </div>
 </template>
 
@@ -26,7 +31,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['change', 'toggleShow']);
+const emit = defineEmits(['dieRolled', 'toggleShow']);
 defineExpose({ rollDie });
 
 const redDiceRef = ref([redOne, redTwo, redThree, redFour, redFive, redSix]);
@@ -54,7 +59,7 @@ async function rollDie() {
       await rotateRange(maxAngle, (i) => i > 0 - maxAngle, -10);
       await rotateRange(0 - maxAngle, (i) => i < 1, 10);
     }
-    emit('change', currentNumber.value + 1, props.die.isRed);
+    emit('dieRolled', props.die, currentNumber.value + 1);
   }
 }
 
@@ -73,7 +78,7 @@ async function delay(time) {
 function toggleShow() {
   if (!props.die.isTogglable) return;
   emit('toggleShow', props.die);
-  currentNumber.value = 0;
+  //currentNumber.value = 0;
 }
 </script>
 
