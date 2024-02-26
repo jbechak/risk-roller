@@ -1,6 +1,7 @@
 <template>
-  <div class="home">
-    <div class="d-flex my-5">
+  <div class="home" id="home">
+    
+    <div class="d-flex mt-3 mb-5">
       <div v-for="die in redDice" :key="die.id">
         <DieComponent ref="redDiceRef" :die="die" @dieRolled="getDieValue" @toggleShow="toggleShow"/>
       </div>
@@ -11,6 +12,7 @@
       </div>
     </div>
     <button type="button" class="btn btn-primary pt-2" @click="rollDice"><h2>Roll</h2></button>
+   
     <div class="d-flex mt-4 justify-content-center">
       <h2 v-if="resultMessage" class="result-message">{{ resultMessage }}</h2>
     </div>
@@ -39,6 +41,9 @@ const whiteDice = ref([
   { id: 1, isActive: true, isTogglable: true, isRed: false, isWinner: false, isLoser: false   },
   { id: 2, isActive: true, isTogglable: true, isRed: false, isWinner: false, isLoser: false   },
 ]);
+
+const activeRedDice = computed(() => redDice.value.filter((die) => die.isActive));
+const activeWhiteDice = computed(() => whiteDice.value.filter((die) => die.isActive));
 
 const resultMessage = computed(() => {
   const redWinnerCount = redDice.value.filter((die) => die.isWinner).length;
@@ -120,21 +125,21 @@ function setToggable(dice) {
 }
 
 function processResults() {
-  const activeRedDice = redDice.value.filter((die) => die.isActive);
-  const activeWhiteDice = whiteDice.value.filter((die) => die.isActive);
-  if (activeWhiteDice.findIndex((die) => die.value) === -1) {
+  // const activeRedDice = redDice.value.filter((die) => die.isActive);
+  // const activeWhiteDice = whiteDice.value.filter((die) => die.isActive);
+  if (activeWhiteDice.value.findIndex((die) => die.value) === -1) {
     return null;
   }
 
-  const isTwoMatches = activeRedDice.length > 1 && activeWhiteDice.length > 1;
-  const highestRedValues = getHighestValues(activeRedDice, isTwoMatches);
-  const highestWhiteValues = getHighestValues(activeWhiteDice, isTwoMatches);
+  const isTwoMatches = activeRedDice.value.length > 1 && activeWhiteDice.value.length > 1;
+  const highestRedValues = getHighestValues(activeRedDice.value, isTwoMatches);
+  const highestWhiteValues = getHighestValues(activeWhiteDice.value, isTwoMatches);
 
   for (let i = 0; i < highestRedValues.length; i++) {
     if (highestRedValues[i] > highestWhiteValues[i]) {
-      assignWinnerAndLoser(activeRedDice, activeWhiteDice, highestRedValues[i], highestWhiteValues[i]);
+      assignWinnerAndLoser(activeRedDice.value, activeWhiteDice.value, highestRedValues[i], highestWhiteValues[i]);
     } else {
-      assignWinnerAndLoser(activeWhiteDice, activeRedDice, highestWhiteValues[i], highestRedValues[i]);
+      assignWinnerAndLoser(activeWhiteDice.value, activeRedDice.value, highestWhiteValues[i], highestRedValues[i]);
     }
   }
 }
@@ -144,20 +149,35 @@ function assignWinnerAndLoser(winnerArr, loserArr, winningValue, losingValue) {
   loserArr.find((die) => die.value === losingValue && !die.isWinner && !die.isLoser).isLoser = true;
 }
 
+// const odds = computed(() => {
+//   activeRedDice.value.forEach((die) => 
+
+// });
+
 watch(
   () => diceRolled.value,
   (value) => {
-    if (value === redDice.value.filter((die) => die.isActive).length + whiteDice.value.filter((die) => die.isActive).length) {
+    if (value === activeRedDice.value.length + activeWhiteDice.value.length) {
       processResults();
     }
   }
-)
+);
 
 </script>
 
 <style scoped>
 .home {
-  width: 400px;
+  width: 420px;
+  height: 650px;
+  position: absolute;
+  z-index: 1;
+  background-image: url('@/assets/highly-blurred-map-2.png');
+}
+
+#background-image {
+  position: fixed;
+  /* width: 160vw; */
+  z-index: 0;
 }
 
 /* .winner-border {
@@ -171,6 +191,10 @@ watch(
   height: 40px;
   width: 250px;
   border-radius: 20%;
+}
+
+hr {
+  border: 5px solid black;
 }
 
 /* @media only screen and (min-width: 1400px) {

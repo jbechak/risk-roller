@@ -49,13 +49,18 @@ const styleClasses = {
   OPACITY_25: "opacity-25",
   POINTER_ON_HOVER: "pointer-on-hover",
   WINNER_BORDER: "winner-border",
+  LOSER_BORDER: "loser-border",
   NO_BORDER: "no-border",
   PARENT_DIV: "parent-div"
 };
 
 const dieImgClass = computed(() => {
   let classes = [props.die?.isActive ? null : styleClasses.OPACITY_25];
-  classes.push(props.die?.isWinner ? styleClasses.WINNER_BORDER : styleClasses.NO_BORDER);
+
+  if (props.die?.isWinner) classes.push(styleClasses.WINNER_BORDER);
+  else if (props.die?.isLoser) classes.push(styleClasses.LOSER_BORDER);
+  else classes.push(styleClasses.NO_BORDER);
+  // classes.push(props.die?.isWinner ? styleClasses.WINNER_BORDER : styleClasses.NO_BORDER);
   return classes;
 
 })
@@ -111,6 +116,12 @@ function toggleShow() {
   margin-bottom: 20px;
 }
 
+.loser-border {
+  border: 10px solid red;
+  border-radius: 15px;
+  margin-bottom: 20px;
+}
+
 .no-border {
   padding: 10px;
 }
@@ -122,7 +133,7 @@ function toggleShow() {
 
 .color-overlay {
   position: relative;
-  bottom: 110px;
+  bottom: 130px;
   left: 10px;
   background-color: gray;
   opacity: 50%;
