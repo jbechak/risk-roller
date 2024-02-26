@@ -11,88 +11,75 @@
       </div>
     </div>
     <button type="button" class="btn btn-primary pt-2" @click="rollDice"><h2>Roll</h2></button>
-
-    <div v-if="rollResult" :class="resultStyleClass">
-      <div v-for="(loser, index) in rollResult.redLosers" :key="index">
-        <LostDie/>
-      </div>
-      <div v-for="(loser, index) in rollResult.whiteLosers" :key="index">
-        <LostDie :isRed="false"/>
-      </div>
+    <div class="d-flex mt-4 justify-content-center">
+      <h2 v-if="resultMessage" class="result-message">{{ resultMessage }}</h2>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, watch, computed } from 'vue';
 import DieComponent from '@/components/DieComponent.vue';
-import LostDie from '@/components/LostDie.vue';
 import { useVibrate } from '@vueuse/core';
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 
 const redDiceRef = ref(null);
 const whiteDiceRef = ref(null);
-// const showRollResult = ref(false);
 const resultEditted = ref(false);
+const diceRolled = ref(0);
 
 const redDice = ref([
-  { id: 1, isActive: true, isTogglable: true, isRed: true },
-  { id: 2, isActive: true, isTogglable: true, isRed: true },
-  { id: 3, isActive: true, isTogglable: true, isRed: true },
+  { id: 1, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },
+  { id: 2, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },
+  { id: 3, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },
 ]);
 
 const whiteDice = ref([
-  { id: 1, isActive: true, isTogglable: true, isRed: false },
-  { id: 2, isActive: true, isTogglable: true, isRed: false },
+  { id: 1, isActive: true, isTogglable: true, isRed: false, isWinner: false, isLoser: false   },
+  { id: 2, isActive: true, isTogglable: true, isRed: false, isWinner: false, isLoser: false   },
 ]);
 
-function getHighestValues(diceArray, isTwoLosers) {
+const resultMessage = computed(() => {
+  const redWinnerCount = redDice.value.filter((die) => die.isWinner).length;
+  const whiteWinnerCount = whiteDice.value.filter((die) => die.isWinner).length;
+
+  if (redWinnerCount === 0 && whiteWinnerCount === 0) 
+    return null;
+
+  const redMinusWhite = redWinnerCount - whiteWinnerCount;
+  switch(redMinusWhite) {
+    case 2:
+      return 'Red Sweep!';
+    case 1:
+      return 'Red Win';
+    case -2:
+      return 'White Sweep!';
+    case -1:
+      return 'White Win';
+    default:
+      return 'Tie';
+  }
+});
+
+function getHighestValues(diceArray, isTwoMatches) {
   let highestValue;
   let secondHighestValue;
 
   diceArray.forEach((die) => {
     if (!highestValue || die.value > highestValue) {
-      if (isTwoLosers && (!secondHighestValue || highestValue > secondHighestValue)) {
+      if (isTwoMatches && (!secondHighestValue || highestValue > secondHighestValue)) {
         secondHighestValue = highestValue;
       }
       highestValue = die.value;
     } 
-    else if (isTwoLosers && (!secondHighestValue || die.value > secondHighestValue)) {
+    else if (isTwoMatches && (!secondHighestValue || die.value > secondHighestValue)) {
       secondHighestValue = die.value;
     }
   });
 
-  return isTwoLosers ? [highestValue, secondHighestValue] : [highestValue];
+  return isTwoMatches ? [highestValue, secondHighestValue] : [highestValue];
 }
-
-const resultStyleClass = computed(() => 
-  resultEditted.value ? 'd-flex opacity-25' : 'd-flex'
-)
-
-const rollResult = computed(() => {
-  const activeRedDice = redDice.value.filter((die) => die.isActive);
-  const activeWhiteDice = whiteDice.value.filter((die) => die.isActive);
-  if (activeWhiteDice.findIndex((die) => die.value) === -1) {
-    return null;
-  }
-
-  const isTwoLosers = activeRedDice.length > 1 && activeWhiteDice.length > 1;
-  const highestRedValues = getHighestValues(activeRedDice, isTwoLosers);
-  const highestWhiteValues = getHighestValues(activeWhiteDice, isTwoLosers);
-
-  let redLosers = 0;
-  let whiteLosers = 0;
-
-  for (let i = 0; i < highestRedValues.length; i++) {
-    if (highestRedValues[i] > highestWhiteValues[i])
-      whiteLosers++;
-    else
-      redLosers++;
-  }
-
-  return { redLosers: redLosers, whiteLosers: whiteLosers };
-});
 
 async function rollDice() {
   resetDiceValues();
@@ -107,11 +94,13 @@ async function rollDice() {
 }
 
 function resetDiceValues() {
-  redDice.value.forEach((die) => die.value = null);
-  whiteDice.value.forEach((die) => die.value = null);
+  diceRolled.value = 0;
+  redDice.value.forEach((die) => { die.value = null; die.isWinner = false; die.isLoser = false; }); 
+  whiteDice.value.forEach((die) => { die.value = null; die.isWinner = false; die.isLoser = false; });
 }
 
 function getDieValue(die, value) {
+  diceRolled.value++;
   die.value = value;
 }
 
@@ -129,11 +118,59 @@ function setToggable(dice) {
     dice.forEach((die) => { if (!die.isTogglable) die.isTogglable = true })
   }
 }
+
+function processResults() {
+  const activeRedDice = redDice.value.filter((die) => die.isActive);
+  const activeWhiteDice = whiteDice.value.filter((die) => die.isActive);
+  if (activeWhiteDice.findIndex((die) => die.value) === -1) {
+    return null;
+  }
+
+  const isTwoMatches = activeRedDice.length > 1 && activeWhiteDice.length > 1;
+  const highestRedValues = getHighestValues(activeRedDice, isTwoMatches);
+  const highestWhiteValues = getHighestValues(activeWhiteDice, isTwoMatches);
+
+  for (let i = 0; i < highestRedValues.length; i++) {
+    if (highestRedValues[i] > highestWhiteValues[i]) {
+      assignWinnerAndLoser(activeRedDice, activeWhiteDice, highestRedValues[i], highestWhiteValues[i]);
+    } else {
+      assignWinnerAndLoser(activeWhiteDice, activeRedDice, highestWhiteValues[i], highestRedValues[i]);
+    }
+  }
+}
+
+function assignWinnerAndLoser(winnerArr, loserArr, winningValue, losingValue) {
+  winnerArr.find((die) => die.value === winningValue && !die.isWinner && !die.isLoser).isWinner = true;
+  loserArr.find((die) => die.value === losingValue && !die.isWinner && !die.isLoser).isLoser = true;
+}
+
+watch(
+  () => diceRolled.value,
+  (value) => {
+    if (value === redDice.value.filter((die) => die.isActive).length + whiteDice.value.filter((die) => die.isActive).length) {
+      processResults();
+    }
+  }
+)
+
 </script>
 
 <style scoped>
 .home {
   width: 400px;
+}
+
+/* .winner-border {
+  border: 5px solid yellow;
+  border-radius: 10px;
+} */
+
+.result-message {
+  border: 2px solid rgb(86, 86, 86);
+  background: rgb(228, 228, 228);
+  height: 40px;
+  width: 250px;
+  border-radius: 20%;
 }
 
 /* @media only screen and (min-width: 1400px) {

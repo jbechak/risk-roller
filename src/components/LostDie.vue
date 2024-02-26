@@ -1,9 +1,7 @@
 <template>
-  <div :class="dieColor">
-    <h1 class="text-center">X
-    </h1>
-
-  </div>
+    <div :class="dieColor">
+      <img src="@/assets/x-marker.png"/>
+    </div>
 
 
 </template>
@@ -30,20 +28,10 @@ div {
   margin-top: 30px;
 }
 
-h1 {
+img {
   position: relative;
-  bottom: 40px;
-  right: 10px;
-  font-size: 120px;
-  font-family: 'Comic Sans MS';
-  width: 90px;
-
-  -webkit-transform:scale(1.3,1); /* Safari and Chrome */
-  -moz-transform:scale(1.3,1); /* Firefox */
-  -ms-transform:scale(1.3,1); /* IE 9 */
-  -o-transform:scale(1.3,1); /* Opera */
-  transform:scale(1.3,1); /* W3C */
-
+  bottom: 13px;
+  right: 13px;
 }
 
 .redDieClass {
