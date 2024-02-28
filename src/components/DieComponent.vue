@@ -36,7 +36,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['dieRolled', 'toggleShow']);
-defineExpose({ rollDie });
+defineExpose({ rollDie, setCurrentNumberToZero });
 
 const redDiceRef = ref([redOne, redTwo, redThree, redFour, redFive, redSix]);
 const whiteDiceRef = ref([whiteOne, whiteTwo, whiteThree, whiteFour, whiteFive, whiteSix]);
@@ -60,7 +60,6 @@ const dieImgClass = computed(() => {
   if (props.die?.isWinner) classes.push(styleClasses.WINNER_BORDER);
   else if (props.die?.isLoser) classes.push(styleClasses.LOSER_BORDER);
   else classes.push(styleClasses.NO_BORDER);
-  // classes.push(props.die?.isWinner ? styleClasses.WINNER_BORDER : styleClasses.NO_BORDER);
   return classes;
 
 })
@@ -102,6 +101,10 @@ async function delay(time) {
 function toggleShow() {
   if (!props.die.isTogglable) return;
   emit('toggleShow', props.die);
+}
+
+function setCurrentNumberToZero() {
+  currentNumber.value = 0;
 }
 </script>
 

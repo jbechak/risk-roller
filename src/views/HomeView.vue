@@ -11,18 +11,24 @@
         <DieComponent ref="whiteDiceRef" :die="die" @dieRolled="getDieValue" @toggleShow="toggleShow"/>
       </div>
     </div>
-    <button type="button" class="btn btn-primary pt-2" @click="rollDice"><h2>Roll</h2></button>
-   
-    <div class="d-flex mt-4 justify-content-center">
-      <h2 v-if="resultMessage" class="result-message">{{ resultMessage }}</h2>
+    <button type="button" class="btn btn-primary pt-3 mx-2" @click="rollDice"><h2>Roll</h2></button>
+    <button type="button" class="btn btn-primary pt-3 mx-2" @click="resetDiceValues"><h2>Reset</h2></button>
+   <hr>
+    <div id="result-container" class="d-flex justify-content-center">
+      <ResultMessage :message="resultMessage"/>
     </div>
+    <hr>
+    <OddsMessage :odds="odds"/>
   </div>
 </template>
 
 <script setup>
 import { ref, watch, computed } from 'vue';
 import DieComponent from '@/components/DieComponent.vue';
+import ResultMessage from '@/components/ResultMessage.vue';
+import OddsMessage from '@/components/OddsMessage.vue';
 import { useVibrate } from '@vueuse/core';
+import { calculateOdds } from '@/oddsHelpers.js'
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 
@@ -30,6 +36,9 @@ const redDiceRef = ref(null);
 const whiteDiceRef = ref(null);
 const resultEditted = ref(false);
 const diceRolled = ref(0);
+//const odds = ref(null);
+
+const odds = computed(() => calculateOdds(activeRedDice.value?.length, activeWhiteDice.value?.length));
 
 const redDice = ref([
   { id: 1, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },
@@ -102,6 +111,8 @@ function resetDiceValues() {
   diceRolled.value = 0;
   redDice.value.forEach((die) => { die.value = null; die.isWinner = false; die.isLoser = false; }); 
   whiteDice.value.forEach((die) => { die.value = null; die.isWinner = false; die.isLoser = false; });
+  redDiceRef.value.forEach((die) => { die.setCurrentNumberToZero(); });
+  whiteDiceRef.value.forEach((die) => { die.setCurrentNumberToZero(); });
 }
 
 function getDieValue(die, value) {
@@ -125,8 +136,6 @@ function setToggable(dice) {
 }
 
 function processResults() {
-  // const activeRedDice = redDice.value.filter((die) => die.isActive);
-  // const activeWhiteDice = whiteDice.value.filter((die) => die.isActive);
   if (activeWhiteDice.value.findIndex((die) => die.value) === -1) {
     return null;
   }
@@ -149,11 +158,6 @@ function assignWinnerAndLoser(winnerArr, loserArr, winningValue, losingValue) {
   loserArr.find((die) => die.value === losingValue && !die.isWinner && !die.isLoser).isLoser = true;
 }
 
-// const odds = computed(() => {
-//   activeRedDice.value.forEach((die) => 
-
-// });
-
 watch(
   () => diceRolled.value,
   (value) => {
@@ -163,40 +167,45 @@ watch(
   }
 );
 
+// onMounted(() => {
+//   odds.value = calculateOdds(activeRedDice.value.length, activeWhiteDice.value.length);
+//   console.log(odds.value);
+// });
 </script>
 
 <style scoped>
 .home {
   width: 420px;
-  height: 650px;
+  height: 1000px;
   position: absolute;
   z-index: 1;
-  background-image: url('@/assets/highly-blurred-map-2.png');
+  background-image: url('@/assets/highly-blurred-map-skinny.png');
 }
 
-#background-image {
+/* #background-image {
   position: fixed;
-  /* width: 160vw; */
+  width: 160vw;
   z-index: 0;
-}
-
-/* .winner-border {
-  border: 5px solid yellow;
-  border-radius: 10px;
 } */
 
-.result-message {
+
+
+/* .result-message {
   border: 2px solid rgb(86, 86, 86);
   background: rgb(228, 228, 228);
   height: 40px;
   width: 250px;
   border-radius: 20%;
-}
+} */
 
 hr {
-  border: 5px solid black;
+  border: 3px solid black;
+  margin-bottom: 5px;
 }
 
+#result-container {
+  height: 30px;
+}
 /* @media only screen and (min-width: 1400px) {
   .home {
     width: 400px;
