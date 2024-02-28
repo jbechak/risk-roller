@@ -166,17 +166,20 @@ watch(
     }
   }
 );
-
-// onMounted(() => {
-//   odds.value = calculateOdds(activeRedDice.value.length, activeWhiteDice.value.length);
-//   console.log(odds.value);
-// });
 </script>
 
 <style scoped>
-.home {
+/* .home {
   width: 420px;
   height: 1000px;
+  position: absolute;
+  z-index: 1;
+  background-image: url('@/assets/highly-blurred-map-skinny.png');
+} */
+
+.home {
+  width: 100vw;
+  height: 200vh;
   position: absolute;
   z-index: 1;
   background-image: url('@/assets/highly-blurred-map-skinny.png');

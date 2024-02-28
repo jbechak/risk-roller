@@ -51,24 +51,27 @@ const styleClasses = {
   WINNER_BORDER: "winner-border",
   LOSER_BORDER: "loser-border",
   NO_BORDER: "no-border",
-  PARENT_DIV: "parent-div"
+  PARENT_DIV: "parent-div",
+  DIE_WIDTH: "die-width",
+  DICE_MARGINS: "dice-margins"
 };
 
 const dieImgClass = computed(() => {
-  let classes = [props.die?.isActive ? null : styleClasses.OPACITY_25];
+  let classes = [styleClasses.DIE_WIDTH];
+  if (!props.die?.isActive) classes.push(styleClasses.OPACITY_25);
 
   if (props.die?.isWinner) classes.push(styleClasses.WINNER_BORDER);
   else if (props.die?.isLoser) classes.push(styleClasses.LOSER_BORDER);
   else classes.push(styleClasses.NO_BORDER);
+  
   return classes;
-
-})
+});
 
 const parentDivClasses = computed(() => {
-  let classes = ['mx-3', styleClasses.PARENT_DIV];
+  let classes = [styleClasses.DICE_MARGINS, styleClasses.PARENT_DIV];
   if (props.die.isTogglable) classes.push(styleClasses.POINTER_ON_HOVER);
   return classes;
-})
+});
 
 const styles = reactive({
   rotate: null
@@ -147,5 +150,20 @@ function setCurrentNumberToZero() {
 
 .opacity-25 {
   opacity: 25% !important;
+}
+
+.die-width {
+  width: 28vw;
+}
+
+.dice-margins {
+  margin-left: 3vw;
+  margin-right: 3vw;
+}
+
+@media only screen and (min-width: 500px) {
+  .die-width {
+    width: 120px;
+  }
 }
 </style>
