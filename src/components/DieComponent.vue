@@ -63,7 +63,7 @@ const dieImgClass = computed(() => {
   if (props.die?.isWinner) classes.push(styleClasses.WINNER_BORDER);
   else if (props.die?.isLoser) classes.push(styleClasses.LOSER_BORDER);
   else classes.push(styleClasses.NO_BORDER);
-  
+
   return classes;
 });
 
@@ -117,14 +117,14 @@ function setCurrentNumberToZero() {
 }
 
 .winner-border {
-  border: 10px solid yellow;
-  border-radius: 15px;
+  border: 2vw solid yellow;
+  border-radius: 5vw;
   margin-bottom: 20px;
 }
 
 .loser-border {
-  border: 10px solid red;
-  border-radius: 15px;
+  border: 2vw solid red;
+  border-radius: 5vw;
   margin-bottom: 20px;
 }
 
@@ -137,19 +137,24 @@ function setCurrentNumberToZero() {
   height: 90px;
 }
 
-.color-overlay {
-  position: relative;
-  bottom: 130px;
-  left: 10px;
-  background-color: gray;
-  opacity: 50%;
-  width: 100px;
-  height: 100px;
-  border-radius: 10px;
-}
-
 .opacity-25 {
   opacity: 25% !important;
+}
+
+.color-overlay {
+  position: relative;
+  bottom: 31vw;
+  left: 2vw;
+  background-color: gray;
+  opacity: 50%;
+  width: 24vw;
+  height: 24vw;
+  border-radius: 4vw;
+}
+.x-marker {
+  position: relative;
+  bottom: 0.5vw;
+  right: 0.5vw;
 }
 
 .die-width {
@@ -165,5 +170,34 @@ function setCurrentNumberToZero() {
   .die-width {
     width: 120px;
   }
+
+  .color-overlay {
+    bottom: 130px;
+    left: 10px;
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+  }
+
+  .x-marker {
+    margin-top: 0px;
+  }
+
+  .winner-border {
+    border-width: 10px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  .loser-border {    
+    border-width: 10px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  .x-marker {
+  bottom: 0vw;
+  right: 0vw;
+}
 }
 </style>
