@@ -1,6 +1,6 @@
 <template>
   <p class="mx-3 text-start">
-      Adjust the number of active dice by clicking on the dice.
+      Click on the dice to toggle which ones are active.
   </p>
 
   <div v-for="(instance, index) in odds" :key="index">

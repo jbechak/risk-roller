@@ -11,7 +11,7 @@
       <input
         id="offensiveArmies"
         type="number"
-        class="form-control form-control-sm"
+        class="form-control form-control-sm w-50"
         min="2"
         max="50"
         v-model="redArmies"
@@ -24,7 +24,7 @@
       <input
         id="defensiveArmies"
         type="number"
-        class="form-control form-control-sm"
+        class="form-control form-control-sm w-50"
         min="1"
         max="50"
         v-model="whiteArmies"
