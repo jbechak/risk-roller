@@ -13,12 +13,18 @@
     </div>
     <button type="button" class="btn btn-primary pt-3 mx-2" @click="rollDice"><h2>Roll</h2></button>
     <button type="button" class="btn btn-primary pt-3 mx-2" @click="resetDiceValues"><h2>Reset</h2></button>
-   <hr>
-    <div id="result-container" class="d-flex justify-content-center">
+   
+    <!-- <hr> -->
+    <div id="result-container" class="d-flex justify-content-center align-items-center mt-4">
       <ResultMessage :message="resultMessage"/>
     </div>
-    <hr>
-    <OddsMessage :odds="odds"/>
+    <!-- <hr> -->
+    
+    <!-- <OddsMessage :odds="odds"/> -->
+    <OddsComponent 
+      :redDiceCount="activeRedDice?.length" 
+      :whiteDiceCount="activeWhiteDice?.length"
+    />
   </div>
 </template>
 
@@ -26,9 +32,10 @@
 import { ref, watch, computed } from 'vue';
 import DieComponent from '@/components/DieComponent.vue';
 import ResultMessage from '@/components/ResultMessage.vue';
-import OddsMessage from '@/components/OddsMessage.vue';
+//import OddsMessage from '@/components/OddsMessage.vue';
+import OddsComponent from '@/components/OddsComponent.vue';
 import { useVibrate } from '@vueuse/core';
-import { calculateOdds } from '@/oddsHelpers.js'
+import { calculateVictoryOdds } from '@/oddsHelpers.js'
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 
@@ -38,7 +45,7 @@ const resultEditted = ref(false);
 const diceRolled = ref(0);
 //const odds = ref(null);
 
-const odds = computed(() => calculateOdds(activeRedDice.value?.length, activeWhiteDice.value?.length));
+// const odds = computed(() => calculateOdds(activeRedDice.value?.length, activeWhiteDice.value?.length));
 
 const redDice = ref([
   { id: 1, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },
@@ -158,6 +165,9 @@ function assignWinnerAndLoser(winnerArr, loserArr, winningValue, losingValue) {
   loserArr.find((die) => die.value === losingValue && !die.isWinner && !die.isLoser).isLoser = true;
 }
 
+console.log(calculateVictoryOdds(4,2));
+//console.log(getResultSets());
+
 watch(
   () => diceRolled.value,
   (value) => {
@@ -207,7 +217,10 @@ hr {
 }
 
 #result-container {
-  height: 30px;
+  height: 40px;
+  /* border-top: 5px solid rgb(86, 86, 86);
+  border-bottom: 5px solid rgb(86, 86, 86); */
+  box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3); 
 }
 /* @media only screen and (min-width: 1400px) {
   .home {

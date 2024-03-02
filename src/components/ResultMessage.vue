@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2>{{ props.message }}</h2>
+    <h2 class="m-0">{{ props.message }}</h2>
   </div>
 </template>
 

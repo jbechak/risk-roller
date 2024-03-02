@@ -4,13 +4,22 @@ let redWhiteWinSet = [];
 let totalCombinations;
 let diceCount;
 
+let battleOdds = {};
+let rollOddsSets = {};
+
 export function calculateOdds(redDiceCount, whiteDiceCount) {
+  const storedResult = rollOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
+  if (storedResult) 
+    return storedResult;
+
   diceCount = redDiceCount + whiteDiceCount;
   resetValues(redDiceCount, whiteDiceCount);
   let currentDie = 0;
   recurseOdds(currentDie);
   totalCombinations = redWhiteWinSet.length;
-  return compileOdds();
+  const result = compileOdds();
+  rollOddsSets[`${redDiceCount}vs${whiteDiceCount}`] = result;
+  return result;
 }
 
 function resetValues(redDiceCount, whiteDiceCount) {
@@ -79,12 +88,38 @@ function getSecondHighest(arr) {
 
 function compileOdds() {
   let result = {
-    redSweep: { label: 'Red Sweep', count: 0},
-    redWin: { label: 'Red Win', count: 0},
-    whiteSweep: { label: 'White Sweep', count: 0},
-    whiteWin: { label: 'White Win', count: 0},
-    tie: { label: 'Tie', count: 0}
+    redSweep: { 
+      label: 'Red Sweep',
+      redLosses: 0, 
+      whiteLosses: 2,
+      count: 0 
+    },
+    redWin: { 
+      label: 'Red Win',
+      redLosses: 0, 
+      whiteLosses: 1,
+      count: 0 
+    },
+    whiteSweep: { 
+      label: 'White Sweep',
+      redLosses: 2, 
+      whiteLosses: 0,
+      count: 0 
+    },
+    whiteWin: { 
+      label: 'White Win',
+      redLosses: 1,  
+      whiteLosses: 0,
+      count: 0 
+    },
+    tie: { 
+      label: 'Tie',
+      redLosses: 1,
+      whiteLosses: 1,
+      count: 0 
+    }
   };
+
   redWhiteWinSet.forEach((redWhite) => {
     if (redWhite[0] == 2) {
       result.redSweep.count++;
@@ -104,7 +139,7 @@ function compileOdds() {
   });
 
   for (let field in result) {
-    result[field].chance = (result[field].count / totalCombinations * 100).toFixed();
+    result[field].chance = (result[field].count / totalCombinations);
   }
 
   let resultArr = [];
@@ -112,6 +147,37 @@ function compileOdds() {
     if (result[property].chance != 0)
       resultArr.push(result[property]);
   }
-  
-  return resultArr.sort((a,b) => b.chance - a.chance);
+
+  return resultArr.sort((a, b) => b.chance - a.chance);
+}
+
+//Advanced Odds
+
+export function calculateVictoryOdds(redDiceCount, whiteDiceCount) {
+  battleOdds.redOccupiers = {};
+  battleOdds.redVictory = 0;
+  battleOdds.whiteVictory = 0;
+  runScenarios(redDiceCount, whiteDiceCount);
+  return battleOdds;
+}
+
+function runScenarios(redDice, whiteDice, chance = 1) { 
+  if (redDice < 2) {
+    battleOdds.whiteVictory += chance;
+  } 
+  else if (whiteDice < 1) {
+    battleOdds.redVictory += chance;
+    if (battleOdds.redOccupiers[`${redDice - 1}armies`]) {
+      battleOdds.redOccupiers[`${redDice - 1}armies`] += chance;
+    } else {
+      battleOdds.redOccupiers[`${redDice - 1}armies`] = chance;
+    }
+  } else {  
+    const redDiceToRoll = redDice > 3 ? 3 : redDice - 1;
+    const whiteDiceToRoll = whiteDice > 1 ? 2 : 1;
+    const rollResults = calculateOdds(redDiceToRoll, whiteDiceToRoll);
+    rollResults.forEach((rollResult) => {
+      runScenarios(redDice - rollResult.redLosses, whiteDice - rollResult.whiteLosses, chance * rollResult.chance);
+    });
+  }
 }
