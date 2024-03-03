@@ -1,11 +1,11 @@
 <template>
-    <p class="mx-3 text-start">
+  <p class="mx-3 text-start">
     Enter the amount of offensive armies, including one army to stay behind. 
     Enter the amount of defensive armies in an adjacent territory. 
   </p>
-  <div class="d-flex justify-content-evenly mb-3">
+  <div class="d-flex justify-content-evenly mb-3 px-3">
     <div>
-      <label for="offensiveArmies" class="form-label">
+      <label for="offensiveArmies" class="form-label text-start">
         Offensive Armies
       </label>
       <input
@@ -18,7 +18,7 @@
       />
     </div>
     <div>
-      <label for="defensiveArmies" class="form-label">
+      <label for="defensiveArmies" class="form-label text-start">
         Defensive Armies
       </label>
       <input
