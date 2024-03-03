@@ -1,6 +1,6 @@
 <template>
     <p class="mx-3 text-start">
-    Enter the amount of armies in an offensive armies, including one army to stay behind. 
+    Enter the amount of offensive armies, including one army to stay behind. 
     Enter the amount of defensive armies in an adjacent territory. 
   </p>
   <div class="d-flex justify-content-evenly mb-3">
@@ -34,19 +34,29 @@
       <h2>Calculate</h2>
     </button>
   </div>
-  <div v-if="offensiveVictoryChance" class="d-flex justify-content-between px-3">
-    <h3>Offensive Victory</h3>
-    <h3>{{ offensiveVictoryChance }}</h3>  
+
+  <!-- <div v-if="isLoading" class="d-flex justify-content-center">
+    <DieComponent :isWaiting="isLoading" />
+    Loading . . .
+  </div> -->
+
+  <div v-if="results.redVictory != null">
+    <div v-if="offensiveVictoryChance" class="d-flex justify-content-between px-3">
+      <h3>Offensive Victory</h3>
+      <h3>{{ offensiveVictoryChance }}</h3>  
+    </div>
+    <div v-if="defensiveVictoryChance" class="d-flex justify-content-between px-3">
+      <h3>Defensive Victory</h3>
+      <h3>{{ defensiveVictoryChance }}</h3>  
+    </div>
   </div>
-  <div v-if="defensiveVictoryChance" class="d-flex justify-content-between px-3">
-    <h3>Defensive Victory</h3>
-    <h3>{{ defensiveVictoryChance }}</h3>  
-  </div>
+
 </template>
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { calculateVictoryOdds } from '@/oddsHelpers.js'
+// import DieComponent from '@/components/DieComponent.vue';
 
 const redArmies = ref(4);
 const whiteArmies = ref(2);
@@ -54,6 +64,7 @@ const results = reactive({
   redVictory: null,
   whiteVictory: null
 });
+//const isLoading = ref(false);
 
 const offensiveVictoryChance = computed(() =>
   results.redVictory ? `${(results.redVictory * 100).toFixed(2)}%` : null
@@ -63,14 +74,14 @@ const defensiveVictoryChance = computed(() =>
   results.whiteVictory ? `${(results.whiteVictory * 100).toFixed(2)}%` : null
 );
 
-function calculateOdds() {
-  console.log('calculate');
-  const odds = calculateVictoryOdds(redArmies.value, whiteArmies.value);
+async function calculateOdds() {
+  // results.redVictory = null;
+  // results.whiteVictory = null;
+  
+  // isLoading.value = true;
+  // console.log('calculate');
+  const odds = await calculateVictoryOdds(redArmies.value, whiteArmies.value);
   Object.assign(results, odds);
+  //isLoading.value = false;
 }
-
 </script>
-
-<style scoped>
-
-</style>

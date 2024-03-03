@@ -4,8 +4,9 @@ let redWhiteWinSet = [];
 let totalCombinations;
 let diceCount;
 
-let battleOdds = {};
+//let battleOdds = {};
 let rollOddsSets = {};
+let battleOddsSets = {};
 
 export function calculateOdds(redDiceCount, whiteDiceCount) {
   const storedResult = rollOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
@@ -153,31 +154,71 @@ function compileOdds() {
 
 //Advanced Odds
 
-export function calculateVictoryOdds(redDiceCount, whiteDiceCount) {
-  battleOdds.redOccupiers = {};
-  battleOdds.redVictory = 0;
-  battleOdds.whiteVictory = 0;
-  runScenarios(redDiceCount, whiteDiceCount);
+export async function calculateVictoryOdds(redDiceCount, whiteDiceCount) {
+  const storedResult = battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
+  if (storedResult) {
+    return storedResult;
+  }
+  let battleOdds = {
+    redOccupiers: {},
+    redVictory: 0,
+    whiteVictory: 0
+  }
+  runScenarios(redDiceCount, whiteDiceCount, battleOdds);
+  battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`] = battleOdds;
+  console.log(battleOddsSets);
   return battleOdds;
 }
 
-function runScenarios(redDice, whiteDice, chance = 1) { 
+function runScenarios(redDice, whiteDice, battleOdds, chance = 1) { 
   if (redDice < 2) {
     battleOdds.whiteVictory += chance;
   } 
+
   else if (whiteDice < 1) {
     battleOdds.redVictory += chance;
+
     if (battleOdds.redOccupiers[`${redDice - 1}armies`]) {
       battleOdds.redOccupiers[`${redDice - 1}armies`] += chance;
+
     } else {
       battleOdds.redOccupiers[`${redDice - 1}armies`] = chance;
     }
-  } else {  
-    const redDiceToRoll = redDice > 3 ? 3 : redDice - 1;
-    const whiteDiceToRoll = whiteDice > 1 ? 2 : 1;
-    const rollResults = calculateOdds(redDiceToRoll, whiteDiceToRoll);
-    rollResults.forEach((rollResult) => {
-      runScenarios(redDice - rollResult.redLosses, whiteDice - rollResult.whiteLosses, chance * rollResult.chance);
-    });
+
+  } else { 
+
+    const storedResult = battleOddsSets[`${redDice}vs${whiteDice}`];
+    if (storedResult) {
+      // console.log('using stored result');
+      // console.log(`${redDice}vs${whiteDice}`, storedResult);
+      battleOdds.redVictory += (chance * storedResult.redVictory);
+      battleOdds.whiteVictory += (chance * storedResult.whiteVictory);
+    } else {
+
+      // console.log('not stored', redDice, whiteDice, chance);
+      battleOddsSets[`${redDice}vs${whiteDice}`] = {
+        redOccupiers: {},
+        redVictory: 0,
+        whiteVictory: 0
+      };
+
+      const redDiceToRoll = redDice > 3 ? 3 : redDice - 1;
+      const whiteDiceToRoll = whiteDice > 1 ? 2 : 1;
+      const rollResults = calculateOdds(redDiceToRoll, whiteDiceToRoll);
+      rollResults.forEach((rollResult) => {
+        runScenarios(
+          redDice - rollResult.redLosses, 
+          whiteDice - rollResult.whiteLosses, 
+          battleOddsSets[`${redDice}vs${whiteDice}`], 
+          1 * rollResult.chance,
+        );
+        runScenarios(
+          redDice - rollResult.redLosses, 
+          whiteDice - rollResult.whiteLosses, 
+          battleOdds, 
+          chance * rollResult.chance,
+        );
+      });
+    }
   }
 }

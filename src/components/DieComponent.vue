@@ -3,18 +3,18 @@
     <img 
       :class="dieImgClass"
       :src="currentDieRef" 
-      :style="styles.rotate" 
+      :style="styles.rotate"
       @click="toggleShow" 
     >
-    <div v-if="die.isLoser && die.isActive" class="color-overlay">
-      <img v-if="die.isLoser" class="x-marker" src="@/assets/x-marker.png" @click="toggleShow" />
+    <div v-if="die?.isLoser && die.isActive" class="color-overlay">
+      <img v-if="die?.isLoser" class="x-marker" src="@/assets/x-marker.png" @click="toggleShow" />
     </div>
     
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed, defineProps, defineEmits, defineExpose } from 'vue';
+import { reactive, ref, computed, defineProps, defineEmits, defineExpose, onMounted } from 'vue';
 import redOne from '@/assets/RedOne.png';
 import redTwo from '@/assets/RedTwo.png';
 import redThree from '@/assets/RedThree.png';
@@ -33,6 +33,10 @@ const props = defineProps({
     type: Object,
     default: null
   },
+  isWaiting: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits(['dieRolled', 'toggleShow']);
@@ -41,7 +45,7 @@ defineExpose({ rollDie, setCurrentNumberToZero });
 const redDiceRef = ref([redOne, redTwo, redThree, redFour, redFive, redSix]);
 const whiteDiceRef = ref([whiteOne, whiteTwo, whiteThree, whiteFour, whiteFive, whiteSix]);
 const currentDieRef = computed(() =>
-  props.die.isRed ? redDiceRef.value[currentNumber.value] : whiteDiceRef.value[currentNumber.value]
+  props.die?.isRed ? redDiceRef.value[currentNumber.value] : whiteDiceRef.value[currentNumber.value]
 );
 
 const currentNumber = ref(0);
@@ -69,7 +73,7 @@ const dieImgClass = computed(() => {
 
 const parentDivClasses = computed(() => {
   let classes = [styleClasses.DICE_MARGINS, styleClasses.PARENT_DIV];
-  if (props.die.isTogglable) classes.push(styleClasses.POINTER_ON_HOVER);
+  if (props.die?.isTogglable) classes.push(styleClasses.POINTER_ON_HOVER);
   return classes;
 });
 
@@ -102,13 +106,32 @@ async function delay(time) {
 }
 
 function toggleShow() {
-  if (!props.die.isTogglable) return;
+  if (!props.die?.isTogglable) return;
   emit('toggleShow', props.die);
 }
 
 function setCurrentNumberToZero() {
   currentNumber.value = 0;
 }
+
+async function runWaitingDie() {
+  currentNumber.value = 5;
+  while (props.isWaiting) {
+    for (let i = 0; i < 360; i += 2) {
+      if (!props.isWaiting) break;
+      await delay(1);
+      styles.rotate = `transform: rotate(${i}deg)`
+    }
+  }
+
+}
+
+onMounted(() => {
+  if (props.isWaiting) {
+    console.log('is waiting');
+    runWaitingDie();
+  }
+})
 </script>
 
 <style scoped>

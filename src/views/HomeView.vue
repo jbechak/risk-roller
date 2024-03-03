@@ -35,7 +35,7 @@ import ResultMessage from '@/components/ResultMessage.vue';
 //import OddsMessage from '@/components/OddsMessage.vue';
 import OddsComponent from '@/components/OddsComponent.vue';
 import { useVibrate } from '@vueuse/core';
-import { calculateVictoryOdds } from '@/oddsHelpers.js'
+// import { calculateVictoryOdds } from '@/oddsHelpers.js'
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 
@@ -164,9 +164,6 @@ function assignWinnerAndLoser(winnerArr, loserArr, winningValue, losingValue) {
   winnerArr.find((die) => die.value === winningValue && !die.isWinner && !die.isLoser).isWinner = true;
   loserArr.find((die) => die.value === losingValue && !die.isWinner && !die.isLoser).isLoser = true;
 }
-
-console.log(calculateVictoryOdds(4,2));
-//console.log(getResultSets());
 
 watch(
   () => diceRolled.value,
