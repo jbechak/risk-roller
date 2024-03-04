@@ -189,11 +189,12 @@ watch(
 } */
 
 .home {
-  width: 100vw;
-  height: 200vh;
+  /* width: 100vw; */
+  /* height: 200vh; */
   position: absolute;
   z-index: 1;
   background-image: url('@/assets/highly-blurred-map-skinny.png');
+  background-repeat: repeat-y;
 }
 
 /* #background-image {
@@ -226,7 +227,7 @@ hr {
 }
 
 .gray-background {
-  background-color: rgb(128, 128, 128);
+  background-color: rgba(128, 128, 128, 0.507);
 }
 
 #result-container {
@@ -234,10 +235,12 @@ hr {
   /* border-top: 5px solid rgb(86, 86, 86);
   border-bottom: 5px solid rgb(86, 86, 86); */
   box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3); 
+  /* width: 90%; */
 }
 @media only screen and (min-width: 501px) {
   .home {
     background-image: url('@/assets/highly-blurred-map.png');
+    width: 100%;
   }
 }
 </style>
