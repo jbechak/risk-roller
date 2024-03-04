@@ -14,13 +14,10 @@
     <button type="button" class="btn btn-primary pt-3 mx-2" @click="rollDice"><h2>Roll</h2></button>
     <button type="button" class="btn btn-primary pt-3 mx-2" @click="resetDiceValues"><h2>Reset</h2></button>
    
-    <!-- <hr> -->
-    <div id="result-container" class="d-flex justify-content-center align-items-center mt-4">
+    <div id="result-container" class="d-flex justify-content-center align-items-center mt-4" :class="resultContainerStyleClass">
       <ResultMessage :message="resultMessage"/>
     </div>
-    <!-- <hr> -->
     
-    <!-- <OddsMessage :odds="odds"/> -->
     <OddsComponent 
       :redDiceCount="activeRedDice?.length" 
       :whiteDiceCount="activeWhiteDice?.length"
@@ -71,16 +68,23 @@ const resultMessage = computed(() => {
   const redMinusWhite = redWinnerCount - whiteWinnerCount;
   switch(redMinusWhite) {
     case 2:
-      return 'Red Sweep!';
+      return 'Offensive Sweep!';
     case 1:
-      return 'Red Win';
+      return 'Offensive Win';
     case -2:
-      return 'White Sweep!';
+      return 'Defensive Sweep!';
     case -1:
-      return 'White Win';
+      return 'Defensive Win';
     default:
       return 'Tie';
   }
+});
+
+const resultContainerStyleClass = computed(() => {
+  if (resultMessage.value?.includes('Offensive')) return 'red-background';
+  if (resultMessage.value?.includes('Defensive')) return 'white-background';
+  if (resultMessage.value?.includes('Tie')) return 'gray-background';
+  return null
 });
 
 function getHighestValues(diceArray, isTwoMatches) {
@@ -213,15 +217,27 @@ hr {
   margin-bottom: 5px;
 }
 
+.red-background {
+  background-color: rgba(255, 0, 0, 0.675);
+}
+
+.white-background {
+  background-color: rgba(255, 255, 255, 0.53);
+}
+
+.gray-background {
+  background-color: rgb(128, 128, 128);
+}
+
 #result-container {
   height: 40px;
   /* border-top: 5px solid rgb(86, 86, 86);
   border-bottom: 5px solid rgb(86, 86, 86); */
   box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3); 
 }
-/* @media only screen and (min-width: 1400px) {
+@media only screen and (min-width: 501px) {
   .home {
-    width: 400px;
+    background-image: url('@/assets/highly-blurred-map.png');
   }
-} */
+}
 </style>

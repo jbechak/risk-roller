@@ -1,6 +1,6 @@
 <template>
   <p class="mx-3 text-start">
-      Click on the dice to toggle which ones are active.
+      Calculates the odds of a single dice roll. Click on the dice to toggle which ones are active.
   </p>
 
   <div v-for="(instance, index) in odds" :key="index">

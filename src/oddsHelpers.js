@@ -90,25 +90,25 @@ function getSecondHighest(arr) {
 function compileOdds() {
   let result = {
     redSweep: { 
-      label: 'Red Sweep',
+      label: 'Offensive Sweep',
       redLosses: 0, 
       whiteLosses: 2,
       count: 0 
     },
     redWin: { 
-      label: 'Red Win',
+      label: 'Offensive Win',
       redLosses: 0, 
       whiteLosses: 1,
       count: 0 
     },
     whiteSweep: { 
-      label: 'White Sweep',
+      label: 'Defensive Sweep',
       redLosses: 2, 
       whiteLosses: 0,
       count: 0 
     },
     whiteWin: { 
-      label: 'White Win',
+      label: 'Defensive Win',
       redLosses: 1,  
       whiteLosses: 0,
       count: 0 
@@ -178,19 +178,27 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
   else if (whiteDice < 1) {
     battleOdds.redVictory += chance;
 
-    if (battleOdds.redOccupiers[`${redDice - 1}armies`]) {
-      battleOdds.redOccupiers[`${redDice - 1}armies`] += chance;
-
-    } else {
-      battleOdds.redOccupiers[`${redDice - 1}armies`] = chance;
-    }
+    battleOdds.redOccupiers[`${redDice - 1}armies`] = battleOdds.redOccupiers[`${redDice - 1}armies`] 
+    ? battleOdds.redOccupiers[`${redDice - 1}armies`] + chance
+    : chance;
 
   } else { 
 
     const storedResult = battleOddsSets[`${redDice}vs${whiteDice}`];
     if (storedResult) {
-      // console.log('using stored result');
-      // console.log(`${redDice}vs${whiteDice}`, storedResult);
+
+      // for (const xArmies in storedResult.redOccupiers) {
+      //   battleOdds.redOccupiers[`${redDice - 1}armies`] = battleOdds.redOccupiers[`${redDice - 1}armies`] 
+      //     ? battleOdds.redOccupiers[`${redDice - 1}armies`] + storedResult.redOccupiers[xArmies] * chance
+      //     : storedResult.redOccupiers[xArmies] * chance;
+      // }
+
+      for (const xArmies in storedResult.redOccupiers) {
+        battleOdds.redOccupiers[xArmies] = battleOdds.redOccupiers[xArmies] 
+          ? battleOdds.redOccupiers[xArmies] + storedResult.redOccupiers[xArmies] * chance
+          : storedResult.redOccupiers[xArmies] * chance;
+      }
+      
       battleOdds.redVictory += (chance * storedResult.redVictory);
       battleOdds.whiteVictory += (chance * storedResult.whiteVictory);
     } else {
