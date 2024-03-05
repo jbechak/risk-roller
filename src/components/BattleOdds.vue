@@ -45,7 +45,7 @@
       data-bs-target="#occupiersList" 
       aria-expanded="false" 
       aria-controls="occupiersList"
-      @click="toggleShowArmyData"
+      @click.prevent="toggleShowArmyData"
     >
       <h3>Offensive Victory</h3>
       <h3>{{ offensiveVictoryChance }}</h3>  
@@ -68,7 +68,6 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { calculateVictoryOdds } from '@/oddsHelpers.js'
-// import DieComponent from '@/components/DieComponent.vue';
 
 const defensiveVictoryRef = ref(null);
 const redArmies = ref(5);
@@ -85,15 +84,12 @@ const expanderStyleClass = computed(() => showArmyData.value ? 'opacity-50' : nu
 function toggleShowArmyData() {
   showArmyData.value = !showArmyData.value;
   if (showArmyData.value) {
-    //defensiveVictoryRef.value.scrollIntoView({ behavior: "smooth" });
-    // window.scrollTo(0, document.body.scrollHeight);
-    // const element = document.getElementById("battleResultsContainer");
-    // element.scrollIntoView({block: 'end'});
-    // window.scrollTo({
-    //     top: document.body.scrollHeight,
-    //     behavior: 'smooth'
-    //   })
+    setTimeout(scrollToDefensiveVictory, 10);
   }
+}
+
+function scrollToDefensiveVictory() {
+  defensiveVictoryRef.value.scrollIntoView({ behavior: "smooth" });
 }
 
 function formatOccupiersKey(rawKey) {
@@ -114,15 +110,9 @@ const defensiveVictoryChance = computed(() =>
 );
 
 async function calculateOdds() {
-  // results.redVictory = null;
-  // results.whiteVictory = null;
-  
-  // isLoading.value = true;
-  // console.log('calculate');
   const odds = await calculateVictoryOdds(redArmies.value, whiteArmies.value);
   Object.assign(results, odds);
-  console.log('results', results);
-  //isLoading.value = false;
+  setTimeout(scrollToDefensiveVictory, 10);
 }
 </script>
 
