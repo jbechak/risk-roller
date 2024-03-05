@@ -1,5 +1,5 @@
 <template>
-  <div class="mb-3">
+  <div id="oddsComponentContainer" class="mb-3">
     <h2 class="mt-3">Odds</h2>
     <nav class="pt-1">
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -108,5 +108,9 @@ const activeTab = ref(tabs.SINGLE_ROLL);
 
 .nav-link.active {
   background-color: rgba(255, 255, 255, 0.344) !important;
+}
+
+#oddsComponentContainer {
+  min-height: 25vh;
 }
 </style>

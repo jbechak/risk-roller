@@ -35,7 +35,7 @@
     </button>
   </div>
 
-  <div v-if="results.redVictory != null">
+  <div id="battleResultsContainer" v-if="results.redVictory != null">
     <div 
       v-if="offensiveVictoryChance" 
       id="offensive-victory"
@@ -45,7 +45,7 @@
       data-bs-target="#occupiersList" 
       aria-expanded="false" 
       aria-controls="occupiersList"
-      @click="showArmyData = !showArmyData"
+      @click="toggleShowArmyData"
     >
       <h3>Offensive Victory</h3>
       <h3>{{ offensiveVictoryChance }}</h3>  
@@ -57,7 +57,7 @@
         <h4>{{ formatChance(chance) }}</h4>  
       </div>
     </div>
-    <div v-if="defensiveVictoryChance" class="d-flex justify-content-between px-3">
+    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="defensiveVictoryChance" class="d-flex justify-content-between px-3">
       <h3>Defensive Victory</h3>
       <h3>{{ defensiveVictoryChance }}</h3>  
     </div>
@@ -70,6 +70,7 @@ import { ref, reactive, computed } from 'vue';
 import { calculateVictoryOdds } from '@/oddsHelpers.js'
 // import DieComponent from '@/components/DieComponent.vue';
 
+const defensiveVictoryRef = ref(null);
 const redArmies = ref(5);
 const whiteArmies = ref(3);
 const results = reactive({
@@ -80,6 +81,20 @@ const results = reactive({
 const showArmyData = ref(false);
 const armyDataStyle = computed(() => showArmyData.value ? 'collapse show' : 'collapse');
 const expanderStyleClass = computed(() => showArmyData.value ? 'opacity-50' : null);
+
+function toggleShowArmyData() {
+  showArmyData.value = !showArmyData.value;
+  if (showArmyData.value) {
+    //defensiveVictoryRef.value.scrollIntoView({ behavior: "smooth" });
+    // window.scrollTo(0, document.body.scrollHeight);
+    // const element = document.getElementById("battleResultsContainer");
+    // element.scrollIntoView({block: 'end'});
+    // window.scrollTo({
+    //     top: document.body.scrollHeight,
+    //     behavior: 'smooth'
+    //   })
+  }
+}
 
 function formatOccupiersKey(rawKey) {
   let num = rawKey.split('a')[0];
