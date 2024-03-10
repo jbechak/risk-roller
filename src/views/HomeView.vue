@@ -29,10 +29,8 @@
 import { ref, watch, computed } from 'vue';
 import DieComponent from '@/components/DieComponent.vue';
 import ResultMessage from '@/components/ResultMessage.vue';
-//import OddsMessage from '@/components/OddsMessage.vue';
 import OddsComponent from '@/components/OddsComponent.vue';
 import { useVibrate } from '@vueuse/core';
-// import { calculateVictoryOdds } from '@/oddsHelpers.js'
 
 const { vibrate } = useVibrate({ pattern: [300, 100, 300] });
 

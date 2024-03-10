@@ -30,9 +30,6 @@
       itemKey="id"
       :options="{sort: true, handle: '.sort-icon'}"
       @end="updateList"
-      @remove="removed"
-      @update="update"
-      @sort="onSort"
     >
       <template #item="{element}">
         <div v-if="!element.isDeleted" class="draggable d-flex" :key="element.id">
@@ -64,6 +61,7 @@
             v-model="element.desiredOccupiers"
             class="w-20 ms-1"
             :class="styleClasses.INPUT_FIELD"
+            :disabled="isLastTerritory(element.id)"
           />
           <font-awesome-icon
             :class="styleClasses.END_ICON"
@@ -119,12 +117,28 @@
     <button ref="calculateButton" type="button" class="btn btn-primary mt-1 pt-3" @click="calculateOdds">
       <h2>Calculate</h2>
     </button>
+
+    <div id="conquestResultsContainer" v-if="results.offensiveVictory != null">
+    <div 
+      v-if="offensiveVictoryChance" 
+      id="offensive-victory"
+      class="d-flex justify-content-between px-1 pt-2 pb-1"
+    >
+      <h3>Offensive Victory</h3>
+      <h3>{{ offensiveVictoryChance }}</h3>  
+    </div>
+    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="defensiveVictoryChance" class="d-flex justify-content-between px-1">
+      <h3>Defensive Victory</h3>
+      <h3>{{ defensiveVictoryChance }}</h3>  
+    </div>
+  </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, nextTick } from "vue";
+import { reactive, ref, nextTick, computed } from "vue";
 import { Sortable } from "sortablejs-vue3";
+import { calculateConquestOdds } from '@/oddsHelpers.js'
 
 const styleClasses = {
   INPUT_FIELD: "form-control mb-1 input-field",
@@ -146,8 +160,18 @@ const rawTerritoryList = ref([
   }
 ]);
 
+const results = reactive({
+  offensiveVictory: null,
+  defensiveVictory: null,
+  redOccupiers: []
+});
+
 Object.assign(orderedTerritoryList.Items, rawTerritoryList.value);
 setUpNewTerritory();
+
+function isLastTerritory(id) {
+  return (orderedTerritoryList.Items[orderedTerritoryList.Items.length - 1].id === id);
+}
 
 function getGuid() {
    return Math.random().toString(36).substring(2, 15) +
@@ -183,40 +207,24 @@ async function addNewTerritory() {
   calculateButton.value.scrollIntoView({ behavior: "smooth" });
 }
 
-// async function submitTerritory(newTerritoryObject, index) {
-//   if (index !== rawTerritoryList.value.length - 1)
-//     return;
-//   //orderedTerritoryList.Items.push(newTerritoryObject);
-//   //orderedTerritoryList.Items[index].name = newTerritoryObject.name;
-
-//   if (rawTerritoryList.value.findIndex((x) => x.name === "") === -1) {
-//     const id = getGuid();
-//     let newTerr = {
-//       id: id,
-//       sortOrder: orderedTerritoryList.Items.length + 1,
-//       //sortOrder: rawTerritoryList.value.length + 1,
-//       name: null, 
-//       placeholder: `Territory ${rawTerritoryList.value.length + 1}`,
-//       defensiveArmies: 1,
-//       desiredOccupiers: 1
-//     }
-//     rawTerritoryList.value.push(newTerr);
-//     orderedTerritoryList.Items.push(newTerr);
-//   }
-
-//   await nextTick();
-//   //const nextIndex = orderedTerritoryList.Items.length > index + 1 ? index + 1 : index;
-// 	//document.getElementById(orderedTerritoryList.Items[nextIndex].id).focus();
-//   calculateButton.value.scrollIntoView({ behavior: "smooth" });
-// }
-
 async function removeTerritory(territory) {
-  console.log(territory);
   territory.isDeleted = true;
   orderedTerritoryList.Items = orderedTerritoryList.Items.filter((obj) => obj.id !== territory.id);
   setSortOrders();
 }
 
+async function calculateOdds() {
+  const odds = await calculateConquestOdds(offensiveArmies.value, orderedTerritoryList.Items);
+  Object.assign(results, odds);
+}
+
+const offensiveVictoryChance = computed(() =>
+  results.offensiveVictory ? `${(results.offensiveVictory * 100).toFixed(2)}%` : null
+);
+
+const defensiveVictoryChance = computed(() =>
+  results.defensiveVictory ? `${(results.defensiveVictory * 100).toFixed(2)}%` : null
+);
 </script>
 
 <style scoped>
@@ -228,15 +236,10 @@ async function removeTerritory(territory) {
 
 .input-field {
   background-color: rgba(128, 128, 128, 0.252);
-
 }
 
 .bottom-border {
   border-bottom: 2px solid rgba(255, 255, 255, 0.326);
-}
-
-.circle-btn {
-  border-radius: 50%;
 }
 
 .w-5 {
@@ -263,15 +266,16 @@ async function removeTerritory(territory) {
   width: 55%;
 }
 
-.ps-half {
-  padding-left: 2px;
-}
-
 .btn-hover:hover {
   cursor: pointer;
 }
 
 .blue-color {
   color: blue;
+}
+
+.form-control:disabled {
+  background-color: rgba(128, 128, 128, 0.252);
+  opacity: 25%;
 }
 </style>

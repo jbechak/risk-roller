@@ -154,7 +154,7 @@ function compileOdds() {
 
 //Advanced Odds
 
-export async function calculateVictoryOdds(redDiceCount, whiteDiceCount) {
+export async function calculateBattleOdds(redDiceCount, whiteDiceCount) {
   const storedResult = battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
   if (storedResult) {
     return storedResult;
@@ -166,7 +166,6 @@ export async function calculateVictoryOdds(redDiceCount, whiteDiceCount) {
   }
   runScenarios(redDiceCount, whiteDiceCount, battleOdds);
   battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`] = battleOdds;
-  console.log(battleOddsSets);
   return battleOdds;
 }
 
@@ -186,13 +185,6 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
 
     const storedResult = battleOddsSets[`${redDice}vs${whiteDice}`];
     if (storedResult) {
-
-      // for (const xArmies in storedResult.redOccupiers) {
-      //   battleOdds.redOccupiers[`${redDice - 1}armies`] = battleOdds.redOccupiers[`${redDice - 1}armies`] 
-      //     ? battleOdds.redOccupiers[`${redDice - 1}armies`] + storedResult.redOccupiers[xArmies] * chance
-      //     : storedResult.redOccupiers[xArmies] * chance;
-      // }
-
       for (const xArmies in storedResult.redOccupiers) {
         battleOdds.redOccupiers[xArmies] = battleOdds.redOccupiers[xArmies] 
           ? battleOdds.redOccupiers[xArmies] + storedResult.redOccupiers[xArmies] * chance
@@ -202,8 +194,6 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
       battleOdds.redVictory += (chance * storedResult.redVictory);
       battleOdds.whiteVictory += (chance * storedResult.whiteVictory);
     } else {
-
-      // console.log('not stored', redDice, whiteDice, chance);
       battleOddsSets[`${redDice}vs${whiteDice}`] = {
         redOccupiers: {},
         redVictory: 0,
@@ -229,4 +219,54 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
       });
     }
   }
+}
+
+export async function calculateConquestOdds(offensiveArmies, territoryList) {
+  let conquestOdds = {
+    redOccupiers: {},
+    offensiveVictory: 0,
+    defensiveVictory: 0
+  }
+  await runBattles(offensiveArmies, conquestOdds, territoryList);
+  return conquestOdds;
+}
+
+async function runBattles(offensiveArmies, conquestOdds, territoryList, chance = 1) {
+  //console.log('territories left', territoryList.length);
+  let battleOdds = await calculateBattleOdds(offensiveArmies, territoryList[0].defensiveArmies);
+  // console.log(battleOdds)
+
+  conquestOdds.defensiveVictory += battleOdds.whiteVictory * chance;
+
+  let remainingTerritories = territoryList.filter((terr, i) => i !== 0);
+  
+  // console.log('territoryList', territoryList);
+  // console.log('remainingTerritories', remainingTerritories);
+
+  if (remainingTerritories.length > 0) {
+    for (const [key, value] of Object.entries(battleOdds.redOccupiers)) {  
+      let offArmies = key.split('a')[0];
+      //('remaining armies', offArmies, 'chance to this point', value * chance);
+
+      // if only 1 army is remaining add to defensiveVictory odds and stop here
+      if (offArmies === 1) {
+        conquestOdds.defensiveVictory += value * chance;
+
+      // else run remaining battles
+      } else {
+        //console.log(territoryList[0].desiredOccupiers);
+        await runBattles(offArmies - territoryList[0].desiredOccupiers + 1, conquestOdds, remainingTerritories, chance * value);
+
+      }
+    }
+  } else {
+    
+    //console.log('add these to offensive victory chance');
+    Object.values(battleOdds.redOccupiers).forEach((value) => {
+      //console.log('chance added', value * chance);
+      conquestOdds.offensiveVictory += value * chance;
+    });
+  }
+
+  //console.log(0, battleOdds.whiteVictory);
 }

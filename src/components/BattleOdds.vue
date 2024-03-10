@@ -67,7 +67,7 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { calculateVictoryOdds } from '@/oddsHelpers.js'
+import { calculateBattleOdds } from '@/oddsHelpers.js'
 
 const defensiveVictoryRef = ref(null);
 const redArmies = ref(5);
@@ -110,7 +110,7 @@ const defensiveVictoryChance = computed(() =>
 );
 
 async function calculateOdds() {
-  const odds = await calculateVictoryOdds(redArmies.value, whiteArmies.value);
+  const odds = await calculateBattleOdds(redArmies.value, whiteArmies.value);
   Object.assign(results, odds);
   setTimeout(scrollToDefensiveVictory, 10);
 }
