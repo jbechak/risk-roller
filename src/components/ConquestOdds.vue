@@ -21,9 +21,9 @@
     <h3 class="text-start">Enemy Territories</h3>
     <div d-flex>
       <label for="" class="w-10">Order</label>
-      <label for="" class="w-55">Territory Name</label>
-      <label for="" class="w-15">Defensive Armies</label>
-      <label for="" class="w-15">Desired Occupiers</label>
+      <label for="" class="w-45">Territory Name</label>
+      <label for="" class="w-20">Defensive Armies</label>
+      <label for="" class="w-20">Desired Occupiers</label>
       <label for="" class="w-5"></label>
       <span class="w-5"></span>
     </div>
@@ -43,7 +43,7 @@
               ref="spaceRefs"
               v-model="element.name"
               maxLength="50"
-              class="form-control mb-1 word-list w-55 input-field"
+              class="form-control mb-1 word-list w-45 input-field"
               :class="getStyleClass(index)" 
               @keyup.enter="submitTerritory(element, index)"
               @focus="onFocus"
@@ -53,7 +53,7 @@
               type="number"
               min="1"
               v-model="element.defensiveArmies"
-              class="form-control mb-1 word-list w-15 ms-1 input-field"
+              class="form-control mb-1 word-list w-20 ms-1 input-field"
               :class="getStyleClass(index)" 
               @keyup.enter="submitTerritory(element, index)"
             />
@@ -61,7 +61,7 @@
               type="number"
               min="1"
               v-model="element.desiredOccupiers"
-              class="form-control mb-1 word-list w-15 ms-1 input-field"
+              class="form-control mb-1 word-list w-20 ms-1 input-field"
               :class="getStyleClass(index)" 
               @keyup.enter="submitTerritory(element, index)"
             />
@@ -213,8 +213,8 @@ function removeTerritory(territory) {
   width: 20%;
 }
 
-.w-55 {
-  width: 55%;
+.w-45 {
+  width: 45%;
 }
 
 .ps-half {
