@@ -20,12 +20,10 @@
 
     <h3 class="text-start">Enemy Territories</h3>
     <div d-flex>
-      <!-- <label for="" class="w-10">Order</label> -->
       <label for="" class="w-55">Territory Name</label>
       <label for="" class="w-20">Defensive Armies</label>
       <label for="" class="w-20">Desired Occupiers</label>
       <label for="" class="w-5"></label>
-      <!-- <span class="w-5"></span> -->
     </div>
     <Sortable
       :list="rawTerritoryList"
@@ -36,26 +34,20 @@
       @update="update"
       @sort="onSort"
     >
-      <template #item="{element, index}">
+      <template #item="{element}">
         <div v-if="!element.isDeleted" class="draggable d-flex" :key="element.id">
           <font-awesome-icon 
-            :class="getSortIconStyleClass(index)" 
-            class="pt-1 pe-1 w-5"
+            class="pt-1 pe-1 w-10 sort-icon"
             size="xl" 
             icon="sort"
           />
-          <!-- <div class="align-self-center w-10 pb-1" :class="getStyleClass(index)" >
-            {{ element.sortOrder }}
-          </div> -->
           <input
             :id="element.id"
             type="text"
-            ref="spaceRefs"
             v-model="element.name"
             maxLength="50"
-            class="form-control mb-1 word-list w-50 input-field"
-            :class="getStyleClass(index)" 
-            @keyup.enter="submitTerritory(element, index)"
+            class="w-45"
+            :class="styleClasses.INPUT_FIELD"
             @focus="onFocus"
             :placeholder="element.placeholder"
           />
@@ -63,37 +55,61 @@
             type="number"
             min="1"
             v-model="element.defensiveArmies"
-            class="form-control mb-1 word-list w-20 ms-1 input-field draggable-item"
-            :class="getStyleClass(index)" 
-            @keyup.enter="submitTerritory(element, index)"
+            class="w-20 ms-1"
+            :class="styleClasses.INPUT_FIELD"
           />
           <input
             type="number"
             min="1"
             v-model="element.desiredOccupiers"
-            class="form-control mb-1 word-list w-20 ms-1 input-field"
-            :class="getStyleClass(index)" 
-            @keyup.enter="submitTerritory(element, index)"
+            class="w-20 ms-1"
+            :class="styleClasses.INPUT_FIELD"
           />
-          <div class="align-self-center w-5 btn-hover">
-            <font-awesome-icon 
-              v-if="index === rawTerritoryList.length - 1"
-              class="pb-1 ps-half blue-color"
-              size="2xl" 
-              icon="plus" 
-              @click="submitTerritory(element, index)"
-            />
-            <font-awesome-icon
-              v-else
-              class="ps-1 pb-1"
-              size="2xl" 
-              icon="xmark" 
-              @click="removeTerritory(element)"
-            />
-          </div>
+          <font-awesome-icon
+            :class="styleClasses.END_ICON"
+            size="2xl" 
+            icon="xmark" 
+            @click="removeTerritory(element)"
+          />
         </div>
       </template>
     </Sortable>
+
+    <div class="d-flex">
+      <input
+        type="text"
+        v-model="newTerritory.name"
+        maxLength="50"
+        class="w-45 ms-5 opacity-25"
+        :class="styleClasses.INPUT_FIELD"
+        @keyup.enter="addNewTerritory"
+        @focus="onFocus"
+        :placeholder="newTerritory.placeholder"
+      />
+      <input
+        type="number"
+        min="1"
+        v-model="newTerritory.defensiveArmies"
+        class="w-20 ms-1 opacity-25"
+        :class="styleClasses.INPUT_FIELD"
+        @keyup.enter="addNewTerritory"
+      />
+      <input
+        type="number"
+        min="1"
+        v-model="newTerritory.desiredOccupiers"
+        class="w-20 ms-1 opacity-25"
+        :class="styleClasses.INPUT_FIELD"
+        @keyup.enter="addNewTerritory"
+      />
+      <font-awesome-icon
+        class="blue-color"
+        :class="styleClasses.END_ICON"
+        size="2xl" 
+        icon="plus" 
+        @click="addNewTerritory"
+      />
+    </div>
 
     <button ref="calculateButton" type="button" class="btn btn-primary mt-1 pt-3" @click="calculateOdds">
       <h2>Calculate</h2>
@@ -105,8 +121,15 @@
 import { reactive, ref, nextTick } from "vue";
 import { Sortable } from "sortablejs-vue3";
 
+const styleClasses = {
+  INPUT_FIELD: "form-control mb-1 input-field",
+  END_ICON: "ps-1 pb-1 align-self-center w-5 btn-hover"
+};
+
+const newTerritory = reactive({});
 const calculateButton = ref(null);
 const offensiveArmies = ref(4);
+const orderedTerritoryList = reactive({ Items: [] });
 const rawTerritoryList = ref([
   {
     id: getGuid(),
@@ -115,63 +138,28 @@ const rawTerritoryList = ref([
     placeholder: "Territory 1",
     defensiveArmies: 1,
     desiredOccupiers: 1
-  },
-  {
-    id: getGuid(),
-    sortOrder: 2,
-    name: null,
-    placeholder: "Territory 2",
-    defensiveArmies: 1,
-    desiredOccupiers: 1
   }
 ]);
 
-function getStyleClass(index) {
-  if (index === rawTerritoryList.value.length - 1) {
-    return 'opacity-25';
-  } 
-  return null
-}
-
-function getSortIconStyleClass(index) {
-  return index === rawTerritoryList.value.length - 1
-    ? 'opacity-25'
-    : 'sort-icon';
-  // if (index === rawTerritoryList.value.length - 1) {
-  //   return 'opacity-25';
-  // } 
-  // else return 'sort-icon';
-}
-
-const orderedTerritoryList = reactive({ Items: [] });
 Object.assign(orderedTerritoryList.Items, rawTerritoryList.value);
+setUpNewTerritory();
 
 function getGuid() {
    return Math.random().toString(36).substring(2, 15) +
    Math.random().toString(36).substring(2, 15);
 }
 
+function setUpNewTerritory() {
+  newTerritory.id = getGuid();
+  newTerritory.name = null;
+  newTerritory.placeholder = `Territory ${rawTerritoryList.value.length + 1}`;
+  newTerritory.defensiveArmies = 1;
+  newTerritory.desiredOccupiers = 1;
+}
+
 function updateList(e) {
-  console.log('end');
-  console.log(e);
-  //rawTerritoryList.value.splice(e.newIndex, 0, rawTerritoryList.value.splice(e.oldIndex, 1)[0]);
   orderedTerritoryList.Items.splice(e.newIndex, 0, orderedTerritoryList.Items.splice(e.oldIndex, 1)[0]);
   setSortOrders();
-}
-
-function update(e) {
-  console.log('update');
-  console.log(e);
-}
-
-function onSort(e) {
-  console.log('sort');
-  console.log(e);
-}
-
-function removed(e) {
-  console.log('removed');
-  console.log(e);
 }
 
 function setSortOrders() {
@@ -180,52 +168,48 @@ function setSortOrders() {
   })
 }
 
-async function submitTerritory(newTerritoryObject, index) {
-  if (index !== rawTerritoryList.value.length - 1)
-    return;
-  //orderedTerritoryList.Items.push(newTerritoryObject);
-  //orderedTerritoryList.Items[index].name = newTerritoryObject.name;
-
-  if (rawTerritoryList.value.findIndex((x) => x.name === "") === -1) {
-    const id = getGuid();
-    let newTerritory = {
-      id: id,
-      sortOrder: orderedTerritoryList.Items.length + 1,
-      //sortOrder: rawTerritoryList.value.length + 1,
-      name: null, 
-      placeholder: `Territory ${rawTerritoryList.value.length + 1}`,
-      defensiveArmies: 1,
-      desiredOccupiers: 1
-    }
-    rawTerritoryList.value.push(newTerritory);
-    orderedTerritoryList.Items.push(newTerritory);
-  }
-
+async function addNewTerritory() {
+  let newTerr = {};
+  Object.assign(newTerr, newTerritory);
+  rawTerritoryList.value.push(newTerr);
+  orderedTerritoryList.Items.push(newTerr);
+  setUpNewTerritory();
   await nextTick();
-  //const nextIndex = orderedTerritoryList.Items.length > index + 1 ? index + 1 : index;
-	//document.getElementById(orderedTerritoryList.Items[nextIndex].id).focus();
   calculateButton.value.scrollIntoView({ behavior: "smooth" });
 }
+
+// async function submitTerritory(newTerritoryObject, index) {
+//   if (index !== rawTerritoryList.value.length - 1)
+//     return;
+//   //orderedTerritoryList.Items.push(newTerritoryObject);
+//   //orderedTerritoryList.Items[index].name = newTerritoryObject.name;
+
+//   if (rawTerritoryList.value.findIndex((x) => x.name === "") === -1) {
+//     const id = getGuid();
+//     let newTerr = {
+//       id: id,
+//       sortOrder: orderedTerritoryList.Items.length + 1,
+//       //sortOrder: rawTerritoryList.value.length + 1,
+//       name: null, 
+//       placeholder: `Territory ${rawTerritoryList.value.length + 1}`,
+//       defensiveArmies: 1,
+//       desiredOccupiers: 1
+//     }
+//     rawTerritoryList.value.push(newTerr);
+//     orderedTerritoryList.Items.push(newTerr);
+//   }
+
+//   await nextTick();
+//   //const nextIndex = orderedTerritoryList.Items.length > index + 1 ? index + 1 : index;
+// 	//document.getElementById(orderedTerritoryList.Items[nextIndex].id).focus();
+//   calculateButton.value.scrollIntoView({ behavior: "smooth" });
+// }
 
 async function removeTerritory(territory) {
   console.log(territory);
   territory.isDeleted = true;
   orderedTerritoryList.Items = orderedTerritoryList.Items.filter((obj) => obj.id !== territory.id);
   setSortOrders();
-
-  // const rawIndex = rawTerritoryList.value.findIndex((obj) => obj.id === territory.id);
-  // const orderedIndex = orderedTerritoryList.Items.findIndex((obj) => obj.id === territory.id)
-  // console.log(rawIndex);
-  // console.log(orderedIndex);
-  // rawTerritoryList.value.splice(rawIndex, 1);
-  // orderedTerritoryList.Items.splice(orderedIndex, 1);
-  // await nextTick();
-  // rawTerritoryList.value = rawTerritoryList.value.filter((obj) => obj.id !== territory.id);
-  // orderedTerritoryList.Items = orderedTerritoryList.Items.filter((obj) => obj.id !== territory.id);
-  //setSortOrders();
-  //rawTerritoryList.value.findIndex(())
-  // rawTerritoryList.value.splice(indexOf(territory), 1)
-  // orderedTerritoryList.Items.splice(indexOf(territory), 1)
 }
 
 </script>
@@ -233,12 +217,13 @@ async function removeTerritory(territory) {
 <style scoped>
 .label { float: left; }
 
-.word-list:hover {
+.sort-icon:hover {
   cursor: move;
 }
 
 .input-field {
   background-color: rgba(128, 128, 128, 0.252);
+
 }
 
 .bottom-border {
