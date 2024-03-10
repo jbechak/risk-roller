@@ -34,7 +34,7 @@
       @end="updateList">
         <template #item="{element, index}">
           <div class="draggable d-flex" :key="element.id">
-            <div class="align-self-center w-10 pb-1">
+            <div class="align-self-center w-10 pb-1" :class="getStyleClass(index)" >
               {{ element.sortOrder }}
             </div>
             <input
