@@ -76,11 +76,16 @@
     </Sortable>
 
     <div class="d-flex">
+      <font-awesome-icon 
+        class="pt-1 pe-1 w-10 opacity-0"
+        size="xl" 
+        icon="sort"
+      />
       <input
         type="text"
         v-model="newTerritory.name"
         maxLength="50"
-        class="w-45 ms-5 opacity-25"
+        class="w-45 opacity-25"
         :class="styleClasses.INPUT_FIELD"
         @keyup.enter="addNewTerritory"
         @focus="onFocus"
