@@ -5,33 +5,33 @@
       <div class="nav nav-tabs" id="nav-tab" role="tablist">
         <button 
           :class="activeTab === tabs.SINGLE_ROLL ? styleClasses.ACTIVE_BUTTON : styleClasses.INACTIVE_BUTTON"
-          id="nav-home-tab" 
+          id="single-roll-tab" 
           data-bs-toggle="tab" 
-          data-bs-target="#nav-home" 
+          data-bs-target="#single-roll" 
           type="button" role="tab" 
-          aria-controls="nav-home" 
+          aria-controls="single-roll" 
           aria-selected="true"
           @click="activeTab = tabs.SINGLE_ROLL"
         >{{ tabs.SINGLE_ROLL }}</button>
         <button 
           :class="activeTab === tabs.BATTLE ? styleClasses.ACTIVE_BUTTON : styleClasses.INACTIVE_BUTTON"
-          id="nav-profile-tab" 
+          id="battle-tab" 
           data-bs-toggle="tab" 
-          data-bs-target="#nav-profile" 
+          data-bs-target="#battle" 
           type="button" 
           role="tab" 
-          aria-controls="nav-profile" 
+          aria-controls="battle" 
           aria-selected="false"
           @click="activeTab = tabs.BATTLE"
         >{{ tabs.BATTLE }}</button>
         <button 
           :class="activeTab === tabs.CONQUEST ? styleClasses.ACTIVE_BUTTON : styleClasses.INACTIVE_BUTTON"
-          id="nav-contact-tab" 
+          id="conquest-tab" 
           data-bs-toggle="tab" 
-          data-bs-target="#nav-contact" 
+          data-bs-target="#conquest" 
           type="button" 
           role="tab" 
-          aria-controls="nav-contact" 
+          aria-controls="conquest" 
           aria-selected="false"
           @click="activeTab = tabs.CONQUEST"
         >{{ tabs.CONQUEST }}</button>
@@ -40,9 +40,9 @@
     <div class="tab-content" id="nav-tabContent">
       <div 
         :class="activeTab === tabs.SINGLE_ROLL ? styleClasses.ACTIVE_TAB : styleClasses.INACTIVE_TAB"
-        id="nav-home" 
+        id="single-roll" 
         role="tabpanel" 
-        aria-labelledby="nav-home-tab"
+        aria-labelledby="single-roll-tab"
       >
         <SingleRollOdds
           :redDiceCount="props.redDiceCount" 
@@ -51,18 +51,20 @@
       </div>
       <div 
         :class="activeTab === tabs.BATTLE ? styleClasses.ACTIVE_TAB : styleClasses.INACTIVE_TAB"
-        id="nav-profile" 
+        id="battle" 
         role="tabpanel" 
-        aria-labelledby="nav-profile-tab"
+        aria-labelledby="battle-tab"
       >
         <BattleOdds/>
       </div>
       <div 
         :class="activeTab === tabs.CONQUEST ? styleClasses.ACTIVE_TAB : styleClasses.INACTIVE_TAB"
-        id="nav-contact" 
+        id="conquest" 
         role="tabpanel" 
-        aria-labelledby="nav-contact-tab"
-      >Coming Soon</div>
+        aria-labelledby="conquest-tab"
+      >
+        <ConquestOdds/>
+      </div>
     </div>
   </div> 
 </template>
@@ -71,6 +73,7 @@
 import { ref, defineProps } from 'vue';
 import SingleRollOdds from '@/components/SingleRollOdds.vue';
 import BattleOdds from '@/components/BattleOdds.vue';
+import ConquestOdds from '@/components/ConquestOdds.vue';
 
 const props = defineProps({
   redDiceCount: {

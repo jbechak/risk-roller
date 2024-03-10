@@ -3,7 +3,7 @@
     Enter the amount of offensive armies, including one army to stay behind. 
     Enter the amount of defensive armies in an adjacent territory. 
   </p>
-  <div class="d-flex justify-content-evenly mb-3 px-3">
+  <div class="d-flex justify-content-evenly pb-3 px-3">
     <div>
       <label for="offensiveArmies" class="form-label text-start">
         Offensive Armies
