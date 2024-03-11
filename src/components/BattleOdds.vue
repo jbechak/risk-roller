@@ -1,33 +1,33 @@
 <template>
   <p class="mx-3 text-start">
-    Enter the amount of offensive armies, including one army to stay behind. 
-    Enter the amount of defensive armies in an adjacent territory. 
+    Enter the amount of offensive battalions, including one army to stay behind. 
+    Enter the amount of defensive battalions in the territory you wish to occupy. 
   </p>
   <div class="d-flex justify-content-evenly pb-3 px-3">
     <div>
-      <label for="offensiveArmies" class="form-label text-start">
-        Offensive Armies
+      <label for="offensiveBattalions" class="form-label text-start">
+        Offensive Battalions
       </label>
       <input
-        id="offensiveArmies"
+        id="offensiveBattalions"
         type="number"
         class="form-control form-control-sm w-50"
         min="2"
-        max="50"
-        v-model="redArmies"
+        max="200"
+        v-model="offensiveBattalions"
       />
     </div>
     <div>
-      <label for="defensiveArmies" class="form-label text-start">
-        Defensive Armies
+      <label for="defensiveBattalions" class="form-label text-start">
+        Defensive Battalions
       </label>
       <input
-        id="defensiveArmies"
+        id="defensiveBattalions"
         type="number"
         class="form-control form-control-sm w-50"
         min="1"
-        max="50"
-        v-model="whiteArmies"
+        max="200"
+        v-model="defensiveBattalions"
       />
     </div>
     <button type="button" class="btn btn-primary mt-1 pt-3" @click="calculateOdds">
@@ -35,9 +35,9 @@
     </button>
   </div>
 
-  <div id="battleResultsContainer" v-if="results.redVictory != null">
+  <div id="battleResultsContainer" v-if="results.offensiveVictory != null">
     <div 
-      v-if="offensiveVictoryChance" 
+      v-if="results.offensiveVictory" 
       id="offensive-victory"
       class="d-flex justify-content-between px-1 pt-1 pb-1"
       :class="expanderStyleClass"
@@ -48,18 +48,18 @@
       @click.prevent="toggleShowArmyData"
     >
       <h3>Offensive Victory</h3>
-      <h3>{{ offensiveVictoryChance }}</h3>  
+      <h3>{{ formatOddsValue(results.offensiveVictory) }}</h3>  
     </div>
     <div :class="armyDataStyle" id="occupiersList">
-      <div v-for="(chance, key, index) in results.redOccupiers" :key="index" class="d-flex justify-content-between ps-4 pe-3">
+      <div v-for="(chance, key, index) in results.offensiveOccupiers" :key="index" class="d-flex justify-content-between ps-4 pe-3">
        
         <h4>{{ formatOccupiersKey(key) }}</h4>
-        <h4>{{ formatChance(chance) }}</h4>  
+        <h4>{{ formatOddsValue(chance) }}</h4>  
       </div>
     </div>
-    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="defensiveVictoryChance" class="d-flex justify-content-between px-3">
+    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="results.defensiveVictory" class="d-flex justify-content-between px-3">
       <h3>Defensive Victory</h3>
-      <h3>{{ defensiveVictoryChance }}</h3>  
+      <h3>{{ formatOddsValue(results.defensiveVictory) }}</h3>  
     </div>
   </div>
 
@@ -67,15 +67,15 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue';
-import { calculateBattleOdds } from '@/oddsHelpers.js'
+import { calculateBattleOdds, formatOddsValue } from '@/oddsHelpers.js'
 
 const defensiveVictoryRef = ref(null);
-const redArmies = ref(5);
-const whiteArmies = ref(3);
+const offensiveBattalions = ref(5);
+const defensiveBattalions = ref(3);
 const results = reactive({
-  redVictory: null,
-  whiteVictory: null,
-  redOccupiers: []
+  offensiveVictory: null,
+  defensiveVictory: null,
+  offensiveOccupiers: []
 });
 const showArmyData = ref(false);
 const armyDataStyle = computed(() => showArmyData.value ? 'collapse show' : 'collapse');
@@ -93,25 +93,12 @@ function scrollToDefensiveVictory() {
 }
 
 function formatOccupiersKey(rawKey) {
-  let num = rawKey.split('a')[0];
+  let num = rawKey.split('b')[0];
   return `${num} offensive occupiers`;
 }
 
-function formatChance(rawChance) {
-  return `${(rawChance * 100).toFixed(2)}%`;
-}
-
-const offensiveVictoryChance = computed(() =>
-  results.redVictory ? `${(results.redVictory * 100).toFixed(2)}%` : null
-);
-
-const defensiveVictoryChance = computed(() =>
-  results.whiteVictory ? `${(results.whiteVictory * 100).toFixed(2)}%` : null
-);
-
 async function calculateOdds() {
-  const odds = await calculateBattleOdds(redArmies.value, whiteArmies.value);
-  Object.assign(results, odds);
+  Object.assign(results, (await calculateBattleOdds(offensiveBattalions.value, defensiveBattalions.value)));
   setTimeout(scrollToDefensiveVictory, 10);
 }
 </script>

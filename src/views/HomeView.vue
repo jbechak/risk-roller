@@ -178,42 +178,11 @@ watch(
 </script>
 
 <style scoped>
-/* .home {
-  width: 420px;
-  height: 1000px;
-  position: absolute;
-  z-index: 1;
-  background-image: url('@/assets/highly-blurred-map-skinny.png');
-} */
-
 .home {
-  /* width: 100vw; */
-  /* height: 200vh; */
   position: absolute;
   z-index: 1;
   background-image: url('@/assets/highly-blurred-map-skinny.png');
   background-repeat: repeat-y;
-}
-
-/* #background-image {
-  position: fixed;
-  width: 160vw;
-  z-index: 0;
-} */
-
-
-
-/* .result-message {
-  border: 2px solid rgb(86, 86, 86);
-  background: rgb(228, 228, 228);
-  height: 40px;
-  width: 250px;
-  border-radius: 20%;
-} */
-
-hr {
-  border: 3px solid black;
-  margin-bottom: 5px;
 }
 
 .red-background {
@@ -230,11 +199,9 @@ hr {
 
 #result-container {
   height: 40px;
-  /* border-top: 5px solid rgb(86, 86, 86);
-  border-bottom: 5px solid rgb(86, 86, 86); */
-  box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3); 
-  /* width: 90%; */
+  box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3);
 }
+
 @media only screen and (min-width: 501px) {
   .home {
     background-image: url('@/assets/highly-blurred-map.png');

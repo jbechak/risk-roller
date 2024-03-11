@@ -4,7 +4,6 @@ let redWhiteWinSet = [];
 let totalCombinations;
 let diceCount;
 
-//let battleOdds = {};
 let rollOddsSets = {};
 let battleOddsSets = {};
 
@@ -35,7 +34,6 @@ function fillArrayWithZeros(arrLength) {
   for (let i = 0; i < arrLength; i++) arr.push(0);
   return arr;
 }
-
 
 function recurseOdds(currentDie) {
   if (currentDie >= diceCount) {
@@ -152,7 +150,7 @@ function compileOdds() {
   return resultArr.sort((a, b) => b.chance - a.chance);
 }
 
-//Advanced Odds
+//Battle Odds
 
 export async function calculateBattleOdds(redDiceCount, whiteDiceCount) {
   const storedResult = battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
@@ -160,9 +158,9 @@ export async function calculateBattleOdds(redDiceCount, whiteDiceCount) {
     return storedResult;
   }
   let battleOdds = {
-    redOccupiers: {},
-    redVictory: 0,
-    whiteVictory: 0
+    offensiveOccupiers: {},
+    offensiveVictory: 0,
+    defensiveVictory: 0
   }
   runScenarios(redDiceCount, whiteDiceCount, battleOdds);
   battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`] = battleOdds;
@@ -171,33 +169,33 @@ export async function calculateBattleOdds(redDiceCount, whiteDiceCount) {
 
 function runScenarios(redDice, whiteDice, battleOdds, chance = 1) { 
   if (redDice < 2) {
-    battleOdds.whiteVictory += chance;
+    battleOdds.defensiveVictory += chance;
   } 
 
   else if (whiteDice < 1) {
-    battleOdds.redVictory += chance;
+    battleOdds.offensiveVictory += chance;
 
-    battleOdds.redOccupiers[`${redDice - 1}armies`] = battleOdds.redOccupiers[`${redDice - 1}armies`] 
-    ? battleOdds.redOccupiers[`${redDice - 1}armies`] + chance
+    battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] = battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] 
+    ? battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] + chance
     : chance;
 
   } else { 
 
     const storedResult = battleOddsSets[`${redDice}vs${whiteDice}`];
     if (storedResult) {
-      for (const xArmies in storedResult.redOccupiers) {
-        battleOdds.redOccupiers[xArmies] = battleOdds.redOccupiers[xArmies] 
-          ? battleOdds.redOccupiers[xArmies] + storedResult.redOccupiers[xArmies] * chance
-          : storedResult.redOccupiers[xArmies] * chance;
+      for (const xBattalions in storedResult.offensiveOccupiers) {
+        battleOdds.offensiveOccupiers[xBattalions] = battleOdds.offensiveOccupiers[xBattalions] 
+          ? battleOdds.offensiveOccupiers[xBattalions] + storedResult.offensiveOccupiers[xBattalions] * chance
+          : storedResult.offensiveOccupiers[xBattalions] * chance;
       }
       
-      battleOdds.redVictory += (chance * storedResult.redVictory);
-      battleOdds.whiteVictory += (chance * storedResult.whiteVictory);
+      battleOdds.offensiveVictory += (chance * storedResult.offensiveVictory);
+      battleOdds.defensiveVictory += (chance * storedResult.defensiveVictory);
     } else {
       battleOddsSets[`${redDice}vs${whiteDice}`] = {
-        redOccupiers: {},
-        redVictory: 0,
-        whiteVictory: 0
+        offensiveOccupiers: {},
+        offensiveVictory: 0,
+        defensiveVictory: 0
       };
 
       const redDiceToRoll = redDice > 3 ? 3 : redDice - 1;
@@ -221,52 +219,45 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
   }
 }
 
-export async function calculateConquestOdds(offensiveArmies, territoryList) {
+//Conquest Odds
+
+export async function calculateConquestOdds(offensiveBattalions, territoryList) {
   let conquestOdds = {
-    redOccupiers: {},
+    offensiveOccupiers: {},
     offensiveVictory: 0,
     defensiveVictory: 0
   }
-  await runBattles(offensiveArmies, conquestOdds, territoryList);
+  await runBattles(offensiveBattalions, conquestOdds, territoryList);
   return conquestOdds;
 }
 
-async function runBattles(offensiveArmies, conquestOdds, territoryList, chance = 1) {
-  //console.log('territories left', territoryList.length);
-  let battleOdds = await calculateBattleOdds(offensiveArmies, territoryList[0].defensiveArmies);
-  // console.log(battleOdds)
-
-  conquestOdds.defensiveVictory += battleOdds.whiteVictory * chance;
+async function runBattles(offensiveBattalions, conquestOdds, territoryList, chance = 1) {
+  let battleOdds = await calculateBattleOdds(offensiveBattalions, territoryList[0].defensiveBattalions);
+  conquestOdds.defensiveVictory += battleOdds.defensiveVictory * chance;
 
   let remainingTerritories = territoryList.filter((terr, i) => i !== 0);
-  
-  // console.log('territoryList', territoryList);
-  // console.log('remainingTerritories', remainingTerritories);
 
   if (remainingTerritories.length > 0) {
-    for (const [key, value] of Object.entries(battleOdds.redOccupiers)) {  
-      let offArmies = key.split('a')[0];
-      //('remaining armies', offArmies, 'chance to this point', value * chance);
+    for (const [key, value] of Object.entries(battleOdds.offensiveOccupiers)) {  
+      let offBattalions = key.split('b')[0];
 
       // if only 1 army is remaining add to defensiveVictory odds and stop here
-      if (offArmies === 1) {
+      if (offBattalions === 1) {
         conquestOdds.defensiveVictory += value * chance;
 
       // else run remaining battles
       } else {
-        //console.log(territoryList[0].desiredOccupiers);
-        await runBattles(offArmies - territoryList[0].desiredOccupiers + 1, conquestOdds, remainingTerritories, chance * value);
-
+        await runBattles(offBattalions - territoryList[0].desiredOccupiers + 1, conquestOdds, remainingTerritories, chance * value);
       }
     }
   } else {
-    
-    //console.log('add these to offensive victory chance');
-    Object.values(battleOdds.redOccupiers).forEach((value) => {
-      //console.log('chance added', value * chance);
+    // last battle has been fought. Add these to offensive victory chance
+    Object.values(battleOdds.offensiveOccupiers).forEach((value) => {
       conquestOdds.offensiveVictory += value * chance;
     });
   }
+}
 
-  //console.log(0, battleOdds.whiteVictory);
+export function formatOddsValue(oddsValue) {
+  return oddsValue ? `${(oddsValue * 100).toFixed(2)}%` : null
 }

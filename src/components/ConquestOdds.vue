@@ -1,29 +1,30 @@
 <template>
   <p class="mx-3 text-start">
     Enter a string of enemy territories to plan your conquest. 
-    You may drag them to reorder. 
+    Click 'Calculate' to view your odds of success. 
   </p>
   <div class="pb-3 px-3">
     <div class="d-flex flex-column mb-3 pb-3 bottom-border">
-      <label for="offensiveArmies" class="form-label pe-2 mb-0">
-        <h3 class="text-start" >Offensive Armies</h3>
+      <label for="offensiveBattalions" class="form-label pe-2 mb-0">
+        <h3 class="text-start" >Offensive Battalions</h3>
       </label>
       <input
-        id="offensiveArmies"
+        id="offensiveBattalions"
         type="number"
         class="form-control form-control-sm w-15 input-field"
         min="2"
         max="100"
-        v-model="offensiveArmies"
+        v-model="offensiveBattalions"
       />
     </div>
 
     <h3 class="text-start">Enemy Territories</h3>
     <div d-flex>
-      <label for="" class="w-55">Territory Name</label>
-      <label for="" class="w-20">Defensive Armies</label>
-      <label for="" class="w-20">Desired Occupiers</label>
-      <label for="" class="w-5"></label>
+      <label class="w-10"></label>
+      <label class="w-45 text-start">Territory Name</label>
+      <label class="w-20 text-start">Defensive Battalions</label>
+      <label class="w-20 text-start">Desired # of Occupiers</label>
+      <label class="w-5"></label>
     </div>
     <Sortable
       :list="rawTerritoryList"
@@ -51,7 +52,7 @@
           <input
             type="number"
             min="1"
-            v-model="element.defensiveArmies"
+            v-model="element.defensiveBattalions"
             class="w-20 ms-1"
             :class="styleClasses.INPUT_FIELD"
           />
@@ -92,7 +93,7 @@
       <input
         type="number"
         min="1"
-        v-model="newTerritory.defensiveArmies"
+        v-model="newTerritory.defensiveBattalions"
         class="w-20 ms-1 opacity-25"
         :class="styleClasses.INPUT_FIELD"
         @keyup.enter="addNewTerritory"
@@ -114,31 +115,31 @@
       />
     </div>
 
-    <button ref="calculateButton" type="button" class="btn btn-primary mt-1 pt-3" @click="calculateOdds">
+    <button ref="calculateButton" type="button" class="btn btn-primary mt-2 pt-3" @click="calculateOdds">
       <h2>Calculate</h2>
     </button>
 
     <div id="conquestResultsContainer" v-if="results.offensiveVictory != null">
     <div 
-      v-if="offensiveVictoryChance" 
+      v-if="results.offensiveVictory" 
       id="offensive-victory"
       class="d-flex justify-content-between px-1 pt-2 pb-1"
     >
       <h3>Offensive Victory</h3>
-      <h3>{{ offensiveVictoryChance }}</h3>  
+      <h3>{{ formatOddsValue(results.offensiveVictory) }}</h3>  
     </div>
-    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="defensiveVictoryChance" class="d-flex justify-content-between px-1">
+    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="results.defensiveVictory" class="d-flex justify-content-between px-1">
       <h3>Defensive Victory</h3>
-      <h3>{{ defensiveVictoryChance }}</h3>  
+      <h3>{{ formatOddsValue(results.defensiveVictory) }}</h3>  
     </div>
   </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, nextTick, computed } from "vue";
+import { reactive, ref, nextTick } from "vue";
 import { Sortable } from "sortablejs-vue3";
-import { calculateConquestOdds } from '@/oddsHelpers.js'
+import { calculateConquestOdds, formatOddsValue } from '@/oddsHelpers.js'
 
 const styleClasses = {
   INPUT_FIELD: "form-control mb-1 input-field",
@@ -147,7 +148,7 @@ const styleClasses = {
 
 const newTerritory = reactive({});
 const calculateButton = ref(null);
-const offensiveArmies = ref(4);
+const offensiveBattalions = ref(4);
 const orderedTerritoryList = reactive({ Items: [] });
 const rawTerritoryList = ref([
   {
@@ -155,7 +156,7 @@ const rawTerritoryList = ref([
     sortOrder: 1,
     name: null,
     placeholder: "Territory 1",
-    defensiveArmies: 1,
+    defensiveBattalions: 1,
     desiredOccupiers: 1
   }
 ]);
@@ -163,7 +164,7 @@ const rawTerritoryList = ref([
 const results = reactive({
   offensiveVictory: null,
   defensiveVictory: null,
-  redOccupiers: []
+  offensiveOccupiers: []
 });
 
 Object.assign(orderedTerritoryList.Items, rawTerritoryList.value);
@@ -182,7 +183,7 @@ function setUpNewTerritory() {
   newTerritory.id = getGuid();
   newTerritory.name = null;
   newTerritory.placeholder = `Territory ${rawTerritoryList.value.length + 1}`;
-  newTerritory.defensiveArmies = 1;
+  newTerritory.defensiveBattalions = 1;
   newTerritory.desiredOccupiers = 1;
 }
 
@@ -214,17 +215,8 @@ async function removeTerritory(territory) {
 }
 
 async function calculateOdds() {
-  const odds = await calculateConquestOdds(offensiveArmies.value, orderedTerritoryList.Items);
-  Object.assign(results, odds);
+  Object.assign(results, (await calculateConquestOdds(offensiveBattalions.value, orderedTerritoryList.Items)));
 }
-
-const offensiveVictoryChance = computed(() =>
-  results.offensiveVictory ? `${(results.offensiveVictory * 100).toFixed(2)}%` : null
-);
-
-const defensiveVictoryChance = computed(() =>
-  results.defensiveVictory ? `${(results.defensiveVictory * 100).toFixed(2)}%` : null
-);
 </script>
 
 <style scoped>
@@ -260,10 +252,6 @@ const defensiveVictoryChance = computed(() =>
 
 .w-45 {
   width: 45%;
-}
-
-.w-55 {
-  width: 55%;
 }
 
 .btn-hover:hover {
