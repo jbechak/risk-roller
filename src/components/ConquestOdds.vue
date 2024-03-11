@@ -20,10 +20,10 @@
 
     <h3 class="text-start">Enemy Territories</h3>
     <div d-flex>
-      <label class="w-10"></label>
+      <label class="w-8"></label>
       <label class="w-45 text-start">Territory Name</label>
-      <label class="w-20 text-start">Defensive Battalions</label>
-      <label class="w-20 text-start">Desired # of Occupiers</label>
+      <label class="w-21 text-start">Defensive Battalions</label>
+      <label class="w-21 text-start">Desired # of Occupiers</label>
       <label class="w-5"></label>
     </div>
     <Sortable
@@ -35,7 +35,7 @@
       <template #item="{element}">
         <div v-if="!element.isDeleted" class="draggable d-flex" :key="element.id">
           <font-awesome-icon 
-            class="pt-1 pe-1 w-10 sort-icon"
+            class="pt-1 pe-1 w-8 sort-icon"
             size="xl" 
             icon="sort"
           />
@@ -53,14 +53,14 @@
             type="number"
             min="1"
             v-model="element.defensiveBattalions"
-            class="w-20 ms-1"
+            class="w-21 ms-1"
             :class="styleClasses.INPUT_FIELD"
           />
           <input
             type="number"
             min="1"
             v-model="element.desiredOccupiers"
-            class="w-20 ms-1"
+            class="w-21 ms-1"
             :class="styleClasses.INPUT_FIELD"
             :disabled="isLastTerritory(element.id)"
           />
@@ -76,7 +76,7 @@
 
     <div class="d-flex">
       <font-awesome-icon 
-        class="pt-1 pe-1 w-10 opacity-0"
+        class="pt-1 pe-1 w-8 opacity-0"
         size="xl" 
         icon="sort"
       />
@@ -94,7 +94,7 @@
         type="number"
         min="1"
         v-model="newTerritory.defensiveBattalions"
-        class="w-20 ms-1 opacity-25"
+        class="w-21 ms-1 opacity-25"
         :class="styleClasses.INPUT_FIELD"
         @keyup.enter="addNewTerritory"
       />
@@ -102,7 +102,7 @@
         type="number"
         min="1"
         v-model="newTerritory.desiredOccupiers"
-        class="w-20 ms-1 opacity-25"
+        class="w-21 ms-1 opacity-25"
         :class="styleClasses.INPUT_FIELD"
         @keyup.enter="addNewTerritory"
       />
@@ -238,16 +238,16 @@ async function calculateOdds() {
   width: 5%;
 }
 
-.w-10 {
-  width: 10%;
+.w-8 {
+  width: 8%;
 }
 
 .w-15 {
   width: 15%;
 }
 
-.w-20 {
-  width: 20%;
+.w-21 {
+  width: 21%;
 }
 
 .w-45 {
