@@ -128,7 +128,6 @@ async function runWaitingDie() {
 
 onMounted(() => {
   if (props.isWaiting) {
-    console.log('is waiting');
     runWaitingDie();
   }
 })

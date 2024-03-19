@@ -34,89 +34,33 @@
       <h2>Calculate</h2>
     </button>
   </div>
-
-  <div id="battleResultsContainer" v-if="results.offensiveVictory != null">
-    <div 
-      v-if="results.offensiveVictory" 
-      id="offensive-victory"
-      class="d-flex justify-content-between px-1 pt-1 pb-1"
-      :class="expanderStyleClass"
-      data-bs-toggle="collapse" 
-      data-bs-target="#occupiersList" 
-      aria-expanded="false" 
-      aria-controls="occupiersList"
-      @click.prevent="toggleShowArmyData"
-    >
-      <h3>Offensive Victory</h3>
-      <h3>{{ formatOddsValue(results.offensiveVictory) }}</h3>  
-    </div>
-    <div :class="armyDataStyle" id="occupiersList">
-      <div v-for="(chance, key, index) in results.offensiveOccupiers" :key="index" class="d-flex justify-content-between ps-4 pe-3">
-       
-        <h4>{{ formatOccupiersKey(key) }}</h4>
-        <h4>{{ formatOddsValue(chance) }}</h4>  
-      </div>
-    </div>
-    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="results.defensiveVictory" class="d-flex justify-content-between px-3">
-      <h3>Defensive Victory</h3>
-      <h3>{{ formatOddsValue(results.defensiveVictory) }}</h3>  
-    </div>
-  </div>
-
+  <BattleConquestResults 
+    :results="results" 
+    :rawOccupierArray="rawOccupierArray"
+  />
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
-import { calculateBattleOdds, formatOddsValue } from '@/oddsHelpers.js'
+import { ref, reactive } from 'vue';
+import { calculateBattleOdds, formatOccupiers } from '@/oddsHelpers.js';
+import BattleConquestResults from '@/components/BattleConquestResults.vue';
 
-const defensiveVictoryRef = ref(null);
 const offensiveBattalions = ref(5);
 const defensiveBattalions = ref(3);
+const rawOccupierArray = ref([{label: null, chance: null}]);
 const results = reactive({
   offensiveVictory: null,
   defensiveVictory: null,
-  offensiveOccupiers: []
+  offensiveOccupiers: [],
 });
-const showArmyData = ref(false);
-const armyDataStyle = computed(() => showArmyData.value ? 'collapse show' : 'collapse');
-const expanderStyleClass = computed(() => showArmyData.value ? 'opacity-50' : null);
-
-function toggleShowArmyData() {
-  showArmyData.value = !showArmyData.value;
-  if (showArmyData.value) {
-    setTimeout(scrollToDefensiveVictory, 10);
-  }
-}
-
-function scrollToDefensiveVictory() {
-  defensiveVictoryRef.value.scrollIntoView({ behavior: "smooth" });
-}
-
-function formatOccupiersKey(rawKey) {
-  let num = rawKey.split('b')[0];
-  return `${num} offensive occupiers`;
-}
 
 async function calculateOdds() {
   Object.assign(results, (await calculateBattleOdds(offensiveBattalions.value, defensiveBattalions.value)));
-  setTimeout(scrollToDefensiveVictory, 10);
+  rawOccupierArray.value = formatOccupiers(results);
 }
 </script>
 
 <style scoped>
-#offensive-victory {
-  border: 2px solid rgba(83, 83, 83, 0.213);
-  border-radius: 4px;
-  background-color: rgba(128, 128, 128, 0.489);
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
-#offensive-victory:hover {
-  opacity: 75%;
-  cursor: pointer;
-}
-
 h3 {
   margin-bottom: 0px;
 }

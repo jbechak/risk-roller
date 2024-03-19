@@ -114,32 +114,21 @@
         @click="addNewTerritory"
       />
     </div>
-
-    <button ref="calculateButton" type="button" class="btn btn-primary mt-2 pt-3" @click="calculateOdds">
+    <button ref="calculateButton" type="button" class="btn btn-primary mt-2 mb-2 pt-3" @click="calculateOdds">
       <h2>Calculate</h2>
     </button>
-
-    <div id="conquestResultsContainer" v-if="results.offensiveVictory != null">
-    <div 
-      v-if="results.offensiveVictory" 
-      id="offensive-victory"
-      class="d-flex justify-content-between px-1 pt-2 pb-1"
-    >
-      <h3>Offensive Victory</h3>
-      <h3>{{ formatOddsValue(results.offensiveVictory) }}</h3>  
-    </div>
-    <div id="defensiveVictoryChance" ref="defensiveVictoryRef" v-if="results.defensiveVictory" class="d-flex justify-content-between px-1">
-      <h3>Defensive Victory</h3>
-      <h3>{{ formatOddsValue(results.defensiveVictory) }}</h3>  
-    </div>
-  </div>
+    <BattleConquestResults 
+      :results="results" 
+      :rawOccupierArray="rawOccupierArray"
+    />
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, nextTick } from "vue";
 import { Sortable } from "sortablejs-vue3";
-import { calculateConquestOdds, formatOddsValue } from '@/oddsHelpers.js'
+import { calculateConquestOdds, formatOccupiers } from '@/oddsHelpers.js';
+import BattleConquestResults from '@/components/BattleConquestResults.vue';
 
 const styleClasses = {
   INPUT_FIELD: "form-control mb-1 input-field",
@@ -150,6 +139,7 @@ const newTerritory = reactive({});
 const calculateButton = ref(null);
 const offensiveBattalions = ref(4);
 const orderedTerritoryList = reactive({ Items: [] });
+const rawOccupierArray = ref([{label: null, chance: null}]);
 const rawTerritoryList = ref([
   {
     id: getGuid(),
@@ -216,6 +206,13 @@ async function removeTerritory(territory) {
 
 async function calculateOdds() {
   Object.assign(results, (await calculateConquestOdds(offensiveBattalions.value, orderedTerritoryList.Items)));
+
+  let potentialOccupierCount = offensiveBattalions.value - 1;
+  for (let i = 0; i < orderedTerritoryList.Items.length - 1; i++) {
+    potentialOccupierCount -= orderedTerritoryList.Items[i].desiredOccupiers;
+  }
+  
+  rawOccupierArray.value = formatOccupiers(results, potentialOccupierCount);
 }
 </script>
 

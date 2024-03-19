@@ -152,65 +152,83 @@ function compileOdds() {
 
 //Battle Odds
 
-export async function calculateBattleOdds(redDiceCount, whiteDiceCount) {
-  const storedResult = battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`];
-  if (storedResult) {
-    return storedResult;
+export function formatOccupiers(battleOdds, potentialOccupierCount = null) {
+  const offenseCount = potentialOccupierCount
+    ? potentialOccupierCount + 1 
+    : battleOdds.offensiveOccupiers.length;
+
+  let occupiersArray = Array.from({ length: offenseCount } , () => ({ label: null, chance: null }));
+
+  occupiersArray[offenseCount - 1].label = `${offenseCount - 1} offensive occupiers`;
+  occupiersArray[offenseCount - 1].chance = battleOdds.offensiveOccupiers[offenseCount - 1];
+  
+  for (let i = offenseCount - 2; i > 0; i--) {
+    occupiersArray[i].label = `${i} or more offensive occupiers`;
+    occupiersArray[i].chance = occupiersArray[i + 1].chance + battleOdds.offensiveOccupiers[i];
   }
+  return occupiersArray;
+}
+
+export async function calculateBattleOdds(offenseCount, defenseCount) {
+  const storedResult = battleOddsSets[`${offenseCount}vs${defenseCount}`];
+  if (storedResult)
+    return storedResult;
+
   let battleOdds = {
-    offensiveOccupiers: {},
+    offensiveOccupiers: new Array(offenseCount),
     offensiveVictory: 0,
     defensiveVictory: 0
   }
-  runScenarios(redDiceCount, whiteDiceCount, battleOdds);
-  battleOddsSets[`${redDiceCount}vs${whiteDiceCount}`] = battleOdds;
+
+  runScenarios(offenseCount, defenseCount, battleOdds);
+  battleOddsSets[`${offenseCount}vs${defenseCount}`] = battleOdds;
   return battleOdds;
 }
 
-function runScenarios(redDice, whiteDice, battleOdds, chance = 1) { 
-  if (redDice < 2) {
+async function runScenarios(offenseCount, defenseCount, battleOdds, chance = 1) {
+  if (offenseCount < 2) {
     battleOdds.defensiveVictory += chance;
   } 
 
-  else if (whiteDice < 1) {
+  else if (defenseCount < 1) {
     battleOdds.offensiveVictory += chance;
 
-    battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] = battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] 
-    ? battleOdds.offensiveOccupiers[`${redDice - 1}battalions`] + chance
+    battleOdds.offensiveOccupiers[offenseCount - 1] = battleOdds.offensiveOccupiers[offenseCount - 1] 
+    ? battleOdds.offensiveOccupiers[offenseCount - 1] + chance
     : chance;
-
   } else { 
 
-    const storedResult = battleOddsSets[`${redDice}vs${whiteDice}`];
+    const storedResult = battleOddsSets[`${offenseCount}vs${defenseCount}`];
     if (storedResult) {
-      for (const xBattalions in storedResult.offensiveOccupiers) {
-        battleOdds.offensiveOccupiers[xBattalions] = battleOdds.offensiveOccupiers[xBattalions] 
-          ? battleOdds.offensiveOccupiers[xBattalions] + storedResult.offensiveOccupiers[xBattalions] * chance
-          : storedResult.offensiveOccupiers[xBattalions] * chance;
+      for (let i = 1; i < storedResult.offensiveOccupiers.length; i++) {
+        battleOdds.offensiveOccupiers[i] = battleOdds.offensiveOccupiers[i] 
+          ? battleOdds.offensiveOccupiers[i] + storedResult.offensiveOccupiers[i] * chance
+          : storedResult.offensiveOccupiers[i] * chance;
       }
-      
+
+
       battleOdds.offensiveVictory += (chance * storedResult.offensiveVictory);
       battleOdds.defensiveVictory += (chance * storedResult.defensiveVictory);
     } else {
-      battleOddsSets[`${redDice}vs${whiteDice}`] = {
-        offensiveOccupiers: {},
+      battleOddsSets[`${offenseCount}vs${defenseCount}`] = {
+        offensiveOccupiers: new Array(offenseCount),
         offensiveVictory: 0,
         defensiveVictory: 0
       };
 
-      const redDiceToRoll = redDice > 3 ? 3 : redDice - 1;
-      const whiteDiceToRoll = whiteDice > 1 ? 2 : 1;
+      const redDiceToRoll = offenseCount > 3 ? 3 : offenseCount - 1;
+      const whiteDiceToRoll = defenseCount > 1 ? 2 : 1;
       const rollResults = calculateOdds(redDiceToRoll, whiteDiceToRoll);
       rollResults.forEach((rollResult) => {
         runScenarios(
-          redDice - rollResult.redLosses, 
-          whiteDice - rollResult.whiteLosses, 
-          battleOddsSets[`${redDice}vs${whiteDice}`], 
+          offenseCount - rollResult.redLosses, 
+          defenseCount - rollResult.whiteLosses, 
+          battleOddsSets[`${offenseCount}vs${defenseCount}`], 
           1 * rollResult.chance,
         );
         runScenarios(
-          redDice - rollResult.redLosses, 
-          whiteDice - rollResult.whiteLosses, 
+          offenseCount - rollResult.redLosses, 
+          defenseCount - rollResult.whiteLosses, 
           battleOdds, 
           chance * rollResult.chance,
         );
@@ -222,8 +240,8 @@ function runScenarios(redDice, whiteDice, battleOdds, chance = 1) {
 //Conquest Odds
 
 export async function calculateConquestOdds(offensiveBattalions, territoryList) {
-  let conquestOdds = {
-    offensiveOccupiers: {},
+  let conquestOdds = {    
+    offensiveOccupiers: new Array(offensiveBattalions),
     offensiveVictory: 0,
     defensiveVictory: 0
   }
@@ -252,6 +270,10 @@ async function runBattles(offensiveBattalions, conquestOdds, territoryList, chan
     }
   } else {
     // last battle has been fought. Add these to offensive victory chance
+    conquestOdds.offensiveOccupiers[offensiveBattalions - 1] = conquestOdds.offensiveOccupiers[offensiveBattalions - 1] 
+      ? conquestOdds.offensiveOccupiers[offensiveBattalions - 1] + chance * battleOdds.offensiveVictory
+      : chance * battleOdds.offensiveVictory;
+
     Object.values(battleOdds.offensiveOccupiers).forEach((value) => {
       conquestOdds.offensiveVictory += value * chance;
     });

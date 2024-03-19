@@ -181,7 +181,7 @@ watch(
 .home {
   position: absolute;
   z-index: 1;
-  background-image: url('@/assets/highly-blurred-map-skinny.png');
+  background-image: url('@/assets/highly-blurred-map-skinny-lesslight.png');
   background-repeat: repeat-y;
 }
 
