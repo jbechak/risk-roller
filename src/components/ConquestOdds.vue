@@ -120,6 +120,7 @@
     <BattleConquestResults 
       :results="results" 
       :rawOccupierArray="rawOccupierArray"
+      :rawHoldOffArray="rawHoldOffArray"
     />
   </div>
 </template>
@@ -127,7 +128,7 @@
 <script setup>
 import { reactive, ref, nextTick } from "vue";
 import { Sortable } from "sortablejs-vue3";
-import { calculateConquestOdds, formatOccupiers } from '@/oddsHelpers.js';
+import { calculateConquestOdds, formatOccupiers, formatDefensiveHoldoffs } from '@/oddsHelpers.js';
 import BattleConquestResults from '@/components/BattleConquestResults.vue';
 
 const styleClasses = {
@@ -140,6 +141,7 @@ const calculateButton = ref(null);
 const offensiveBattalions = ref(4);
 const orderedTerritoryList = reactive({ Items: [] });
 const rawOccupierArray = ref([{label: null, chance: null}]);
+const rawHoldOffArray = ref([{label: null, chance: null}]);
 const rawTerritoryList = ref([
   {
     id: getGuid(),
@@ -204,6 +206,7 @@ async function removeTerritory(territory) {
   setSortOrders();
 }
 
+
 async function calculateOdds() {
   Object.assign(results, (await calculateConquestOdds(offensiveBattalions.value, orderedTerritoryList.Items)));
 
@@ -213,6 +216,7 @@ async function calculateOdds() {
   }
   
   rawOccupierArray.value = formatOccupiers(results, potentialOccupierCount);
+  rawHoldOffArray.value = formatDefensiveHoldoffs(results, orderedTerritoryList.Items);
 }
 </script>
 

@@ -239,9 +239,13 @@ async function runScenarios(offenseCount, defenseCount, battleOdds, chance = 1) 
 
 //Conquest Odds
 
+let territoryCount = null;
+
 export async function calculateConquestOdds(offensiveBattalions, territoryList) {
+  territoryCount = territoryList.length;
   let conquestOdds = {    
     offensiveOccupiers: new Array(offensiveBattalions),
+    defensiveHoldoffs: new Array(territoryCount),
     offensiveVictory: 0,
     defensiveVictory: 0
   }
@@ -258,10 +262,13 @@ async function runBattles(offensiveBattalions, conquestOdds, territoryList, chan
   if (remainingTerritories.length > 0) {
     for (const [key, value] of Object.entries(battleOdds.offensiveOccupiers)) {  
       let offBattalions = key.split('b')[0];
-
       // if only 1 army is remaining add to defensiveVictory odds and stop here
-      if (offBattalions === 1) {
+      if (offBattalions == 1) {
         conquestOdds.defensiveVictory += value * chance;
+        const currentTerritoryIndex = territoryCount - remainingTerritories.length - 1;
+        conquestOdds.defensiveHoldoffs[currentTerritoryIndex] = conquestOdds.defensiveHoldoffs[currentTerritoryIndex] 
+          ? conquestOdds.defensiveHoldoffs[currentTerritoryIndex] + value * chance + battleOdds.defensiveVictory * chance
+          : value * chance + battleOdds.defensiveVictory * chance;
 
       // else run remaining battles
       } else {
@@ -282,4 +289,19 @@ async function runBattles(offensiveBattalions, conquestOdds, territoryList, chan
 
 export function formatOddsValue(oddsValue) {
   return oddsValue ? `${(oddsValue * 100).toFixed(2)}%` : null
+}
+
+export function formatDefensiveHoldoffs(results, territoryList) {
+  let totalChance = 0;
+  let resultArray = Array.from({ length: territoryList.length } , () => ({ label: null, chance: null }));
+  for (let i = 0; i < resultArray.length; i++) {
+    resultArray[i].label = `Held off in or before ${territoryList[i].name ?? territoryList[i].placeholder}`;
+    if (i === resultArray.length - 1) {
+      resultArray[i].chance = results.defensiveVictory;
+    } else {
+      totalChance += results.defensiveHoldoffs[i];
+      resultArray[i].chance = totalChance;
+    }
+  }
+  return resultArray;
 }
