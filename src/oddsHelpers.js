@@ -295,7 +295,7 @@ export function formatDefensiveHoldoffs(results, territoryList) {
   let totalChance = 0;
   let resultArray = Array.from({ length: territoryList.length } , () => ({ label: null, chance: null }));
   for (let i = 0; i < resultArray.length; i++) {
-    resultArray[i].label = `Held off in or before ${territoryList[i].name ?? territoryList[i].placeholder}`;
+    resultArray[i].label = `Victory in or before ${territoryList[i].name ?? territoryList[i].placeholder}`;
     if (i === resultArray.length - 1) {
       resultArray[i].chance = results.defensiveVictory;
     } else {
