@@ -167,8 +167,8 @@ function isLastTerritory(id) {
 }
 
 function getGuid() {
-   return Math.random().toString(36).substring(2, 15) +
-   Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) +
+  Math.random().toString(36).substring(2, 15);
 }
 
 function setUpNewTerritory() {
