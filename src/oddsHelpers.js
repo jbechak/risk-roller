@@ -150,7 +150,7 @@ function compileOdds() {
   return resultArr.sort((a, b) => b.chance - a.chance);
 }
 
-//Battle Odds
+//Battle Odds Functions
 
 export function formatOccupiers(battleOdds, potentialOccupierCount = null) {
   const offenseCount = potentialOccupierCount
@@ -192,23 +192,15 @@ async function runScenarios(offenseCount, defenseCount, battleOdds, chance = 1) 
 
   else if (defenseCount < 1) {
     battleOdds.offensiveVictory += chance;
-
     battleOdds.offensiveOccupiers[offenseCount - 1] = battleOdds.offensiveOccupiers[offenseCount - 1] 
     ? battleOdds.offensiveOccupiers[offenseCount - 1] + chance
     : chance;
-  } else { 
-
+  } 
+  
+  else { 
     const storedResult = battleOddsSets[`${offenseCount}vs${defenseCount}`];
     if (storedResult) {
-      for (let i = 1; i < storedResult.offensiveOccupiers.length; i++) {
-        battleOdds.offensiveOccupiers[i] = battleOdds.offensiveOccupiers[i] 
-          ? battleOdds.offensiveOccupiers[i] + storedResult.offensiveOccupiers[i] * chance
-          : storedResult.offensiveOccupiers[i] * chance;
-      }
-
-
-      battleOdds.offensiveVictory += (chance * storedResult.offensiveVictory);
-      battleOdds.defensiveVictory += (chance * storedResult.defensiveVictory);
+      updateBattleOddsUsingStoredResult(battleOdds, storedResult, chance);
     } else {
       battleOddsSets[`${offenseCount}vs${defenseCount}`] = {
         offensiveOccupiers: new Array(offenseCount),
@@ -219,25 +211,39 @@ async function runScenarios(offenseCount, defenseCount, battleOdds, chance = 1) 
       const redDiceToRoll = offenseCount > 3 ? 3 : offenseCount - 1;
       const whiteDiceToRoll = defenseCount > 1 ? 2 : 1;
       const rollResults = calculateOdds(redDiceToRoll, whiteDiceToRoll);
-      rollResults.forEach((rollResult) => {
-        runScenarios(
-          offenseCount - rollResult.redLosses, 
-          defenseCount - rollResult.whiteLosses, 
-          battleOddsSets[`${offenseCount}vs${defenseCount}`], 
-          1 * rollResult.chance,
-        );
-        runScenarios(
-          offenseCount - rollResult.redLosses, 
-          defenseCount - rollResult.whiteLosses, 
-          battleOdds, 
-          chance * rollResult.chance,
-        );
-      });
+      runScenariosBasedOnRollResults(offenseCount, defenseCount, battleOdds, rollResults, chance);
     }
   }
 }
 
-//Conquest Odds
+function updateBattleOddsUsingStoredResult(battleOdds, storedResult, chance = 1) {
+  for (let i = 1; i < storedResult.offensiveOccupiers.length; i++) {
+    battleOdds.offensiveOccupiers[i] = battleOdds.offensiveOccupiers[i] 
+      ? battleOdds.offensiveOccupiers[i] + storedResult.offensiveOccupiers[i] * chance
+      : storedResult.offensiveOccupiers[i] * chance;
+  }
+  battleOdds.offensiveVictory += (chance * storedResult.offensiveVictory);
+  battleOdds.defensiveVictory += (chance * storedResult.defensiveVictory);
+}
+
+function runScenariosBasedOnRollResults(offenseCount, defenseCount, battleOdds, rollResults, chance = 1) {
+  rollResults.forEach((rollResult) => {
+    runScenarios(
+      offenseCount - rollResult.redLosses, 
+      defenseCount - rollResult.whiteLosses, 
+      battleOddsSets[`${offenseCount}vs${defenseCount}`], 
+      1 * rollResult.chance,
+    );
+    runScenarios(
+      offenseCount - rollResult.redLosses, 
+      defenseCount - rollResult.whiteLosses, 
+      battleOdds, 
+      chance * rollResult.chance,
+    );
+  });
+}
+
+//Conquest Odds Functions
 
 let territoryCount = null;
 

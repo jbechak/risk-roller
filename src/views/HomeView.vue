@@ -1,6 +1,5 @@
 <template>
   <div class="home" id="home">
-    
     <div class="d-flex mt-3 mb-5">
       <div v-for="die in redDice" :key="die.id">
         <DieComponent ref="redDiceRef" :die="die" @dieRolled="getDieValue" @toggleShow="toggleShow"/>
@@ -38,9 +37,6 @@ const redDiceRef = ref(null);
 const whiteDiceRef = ref(null);
 const resultEditted = ref(false);
 const diceRolled = ref(0);
-//const odds = ref(null);
-
-// const odds = computed(() => calculateOdds(activeRedDice.value?.length, activeWhiteDice.value?.length));
 
 const redDice = ref([
   { id: 1, isActive: true, isTogglable: true, isRed: true, isWinner: false, isLoser: false   },

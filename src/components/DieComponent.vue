@@ -203,6 +203,8 @@ onMounted(() => {
 
   .x-marker {
     margin-top: 0px;
+    bottom: 0vw;
+    right: 0vw;
   }
 
   .winner-border {
@@ -217,9 +219,9 @@ onMounted(() => {
     margin-bottom: 20px;
   }
 
-  .x-marker {
-  bottom: 0vw;
-  right: 0vw;
-}
+  /* .x-marker {
+    bottom: 0vw;
+    right: 0vw;
+    } */
 }
 </style>
