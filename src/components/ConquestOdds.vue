@@ -114,8 +114,14 @@
         @click="addNewTerritory"
       />
     </div>
-    <button ref="calculateButton" type="button" class="btn btn-primary mt-2 mb-2 pt-3" @click="calculateOdds">
-      <h2>Calculate</h2>
+    <button 
+      ref="calculateButton" 
+      type="button" 
+      class="btn btn-primary mt-2 mb-2 pt-3" 
+      :disabled="isCalculating" 
+      @click="calculateOdds"
+    >
+      <h2>{{ calculateButtonLabel }}</h2>
     </button>
     <BattleConquestResults 
       :results="results" 
@@ -126,7 +132,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, nextTick } from "vue";
+import { reactive, ref, nextTick, computed } from "vue";
 import { Sortable } from "sortablejs-vue3";
 import { calculateConquestOdds, formatOccupiers, formatDefensiveHoldoffs } from '@/oddsHelpers.js';
 import BattleConquestResults from '@/components/BattleConquestResults.vue';
@@ -136,6 +142,7 @@ const styleClasses = {
   END_ICON: "ps-1 pb-1 align-self-center w-5 btn-hover"
 };
 
+const isCalculating = ref(null);
 const newTerritory = reactive({});
 const calculateButton = ref(null);
 const offensiveBattalions = ref(4);
@@ -158,6 +165,8 @@ const results = reactive({
   defensiveVictory: null,
   offensiveOccupiers: []
 });
+
+const calculateButtonLabel = computed(() => isCalculating.value ? 'Calculating...' : 'Calculate');
 
 Object.assign(orderedTerritoryList.Items, rawTerritoryList.value);
 setUpNewTerritory();
@@ -206,8 +215,9 @@ async function removeTerritory(territory) {
   setSortOrders();
 }
 
-
 async function calculateOdds() {
+  isCalculating.value = true;
+  await new Promise((r) => setTimeout(r, 100));
   Object.assign(results, (await calculateConquestOdds(offensiveBattalions.value, orderedTerritoryList.Items)));
 
   let potentialOccupierCount = offensiveBattalions.value - 1;
@@ -217,6 +227,7 @@ async function calculateOdds() {
   
   rawOccupierArray.value = formatOccupiers(results, potentialOccupierCount);
   rawHoldOffArray.value = formatDefensiveHoldoffs(results, orderedTerritoryList.Items);
+  isCalculating.value = false;
 }
 </script>
 
@@ -266,5 +277,9 @@ async function calculateOdds() {
 .form-control:disabled {
   background-color: rgba(128, 128, 128, 0.252);
   opacity: 25%;
+}
+
+.opacity-25 {
+  opacity: 25% !important;
 }
 </style>

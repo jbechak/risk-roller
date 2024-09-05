@@ -218,10 +218,5 @@ onMounted(() => {
     border-radius: 20px;
     margin-bottom: 20px;
   }
-
-  /* .x-marker {
-    bottom: 0vw;
-    right: 0vw;
-    } */
 }
 </style>
