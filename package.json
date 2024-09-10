@@ -19,7 +19,8 @@
     "sortablejs": "^1.15.2",
     "sortablejs-vue3": "^1.2.11",
     "vue": "^3.4.19",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.0.3",
+    "yup": "^1.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

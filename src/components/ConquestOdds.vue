@@ -3,6 +3,12 @@
     Enter a string of enemy territories to plan your conquest. 
     Click 'Calculate' to view your odds of success. 
   </p>
+  <div v-if="validationErrors?.length > 0" class="mx-3 text-danger text-start">
+    <div v-for="(error, index) in validationErrors" :key="index">
+      {{ error }}
+    </div>
+  </div>
+
   <div class="pb-3 px-3">
     <div class="d-flex flex-column mb-3 pb-3 bottom-border">
       <label for="offensiveBattalions" class="form-label pe-2 mb-0">
@@ -14,7 +20,7 @@
         class="form-control form-control-sm w-15 input-field"
         min="2"
         max="100"
-        v-model="offensiveBattalions"
+        v-model="formData.offensiveBattalions"
       />
     </div>
 
@@ -135,6 +141,7 @@
 import { reactive, ref, nextTick, computed } from "vue";
 import { Sortable } from "sortablejs-vue3";
 import { calculateConquestOdds, formatOccupiers, formatDefensiveHoldoffs } from '@/oddsHelpers.js';
+import * as yup from 'yup';
 import BattleConquestResults from '@/components/BattleConquestResults.vue';
 
 const styleClasses = {
@@ -145,20 +152,24 @@ const styleClasses = {
 const isCalculating = ref(null);
 const newTerritory = reactive({});
 const calculateButton = ref(null);
-const offensiveBattalions = ref(4);
+const validationErrors = ref(null);
 const orderedTerritoryList = reactive({ Items: [] });
 const rawOccupierArray = ref([{label: null, chance: null}]);
 const rawHoldOffArray = ref([{label: null, chance: null}]);
 const rawTerritoryList = ref([
   {
     id: getGuid(),
-    sortOrder: 1,
     name: null,
     placeholder: "Territory 1",
     defensiveBattalions: 1,
     desiredOccupiers: 1
   }
 ]);
+
+const formData = reactive({
+  offensiveBattalions: 4,
+  enemyTerritoryList: [],
+});
 
 const results = reactive({
   offensiveVictory: null,
@@ -168,11 +179,13 @@ const results = reactive({
 
 const calculateButtonLabel = computed(() => isCalculating.value ? 'Calculating...' : 'Calculate');
 
+
+formData.enemyTerritoryList = [...rawTerritoryList.value];
 Object.assign(orderedTerritoryList.Items, rawTerritoryList.value);
 setUpNewTerritory();
 
 function isLastTerritory(id) {
-  return (orderedTerritoryList.Items[orderedTerritoryList.Items.length - 1].id === id);
+  return (formData.enemyTerritoryList[formData.enemyTerritoryList.length - 1].id === id);
 }
 
 function getGuid() {
@@ -189,21 +202,14 @@ function setUpNewTerritory() {
 }
 
 function updateList(e) {
-  orderedTerritoryList.Items.splice(e.newIndex, 0, orderedTerritoryList.Items.splice(e.oldIndex, 1)[0]);
-  setSortOrders();
-}
-
-function setSortOrders() {
-  orderedTerritoryList.Items.forEach((obj, idx) => {
-    obj.sortOrder = idx + 1;
-  })
+  formData.enemyTerritoryList.splice(e.newIndex, 0, formData.enemyTerritoryList.splice(e.oldIndex, 1)[0]);
 }
 
 async function addNewTerritory() {
   let newTerr = {};
   Object.assign(newTerr, newTerritory);
   rawTerritoryList.value.push(newTerr);
-  orderedTerritoryList.Items.push(newTerr);
+  formData.enemyTerritoryList.push(newTerr);
   setUpNewTerritory();
   await nextTick();
   calculateButton.value.scrollIntoView({ behavior: "smooth" });
@@ -211,24 +217,62 @@ async function addNewTerritory() {
 
 async function removeTerritory(territory) {
   territory.isDeleted = true;
-  orderedTerritoryList.Items = orderedTerritoryList.Items.filter((obj) => obj.id !== territory.id);
-  setSortOrders();
+  formData.enemyTerritoryList = formData.enemyTerritoryList.filter((obj) => obj.id !== territory.id);
 }
 
 async function calculateOdds() {
+  if (!validateForm())
+    return;
+
   isCalculating.value = true;
   await new Promise((r) => setTimeout(r, 100));
-  Object.assign(results, (await calculateConquestOdds(offensiveBattalions.value, orderedTerritoryList.Items)));
+  Object.assign(results, (await calculateConquestOdds(formData.offensiveBattalions, formData.enemyTerritoryList)));
 
-  let potentialOccupierCount = offensiveBattalions.value - 1;
-  for (let i = 0; i < orderedTerritoryList.Items.length - 1; i++) {
-    potentialOccupierCount -= orderedTerritoryList.Items[i].desiredOccupiers;
+  let potentialOccupierCount = formData.offensiveBattalions - 1;
+  for (let i = 0; i < formData.enemyTerritoryList.length - 1; i++) {
+    potentialOccupierCount -= formData.enemyTerritoryList[i].desiredOccupiers;
   }
   
   rawOccupierArray.value = formatOccupiers(results, potentialOccupierCount);
-  rawHoldOffArray.value = formatDefensiveHoldoffs(results, orderedTerritoryList.Items);
+  rawHoldOffArray.value = formatDefensiveHoldoffs(results, formData.enemyTerritoryList);
   isCalculating.value = false;
 }
+
+const validationSchema = yup.object().shape({
+  offensiveBattalions: yup.number().nullable().required().max(200).label('Offensive Battalions'),
+  enemyTerritoryList: yup.array()
+    .test(
+      'tooManyOccupiers',
+      'Desired # of Occupiers exceeds Offensive Battalions',
+      (value) => value.map(i=>i.desiredOccupiers).reduce((a, b) => a + b) <= formData.offensiveBattalions
+    )
+    .nullable()
+    .of(yup.object().shape({
+      name: yup.string().nullable().max(50).label('Territory Name')
+        .test(
+          'nameRequired',
+          'Territory Name is a required field',
+          (value, context) => value || context.parent.placeholder
+        ),
+      defensiveBattalions: yup.number().nullable().required().positive().max(200).label('Defensive Battalions'),
+      desiredOccupiers: yup.number().nullable().required().positive().max(200).label('Desired # of Occupiers')
+  }))
+});
+
+
+function validateForm() {
+  validationErrors.value = [];
+  try {
+    validationSchema.validateSync(formData, { abortEarly: false });
+    return true;
+  } catch (error) {
+    error.inner.forEach(e => {
+        validationErrors.value.push(e.message);
+    });
+    return false;
+  }
+}
+
 </script>
 
 <style scoped>
