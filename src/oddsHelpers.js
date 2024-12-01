@@ -268,13 +268,17 @@ async function runBattles(offensiveBattalions, conquestOdds, territoryList, chan
   if (remainingTerritories.length > 0) {
     for (const [key, value] of Object.entries(battleOdds.offensiveOccupiers)) {
       let offBattalions = key.split('b')[0] - territoryList[0].desiredOccupiers + 1;
+
       // if only 1 army is remaining add to defensiveVictory odds and stop here
       if (offBattalions <= 1) {
         conquestOdds.defensiveVictory += value * chance;
         const currentTerritoryIndex = territoryCount - remainingTerritories.length - 1;
-        conquestOdds.defensiveHoldoffs[currentTerritoryIndex] = conquestOdds.defensiveHoldoffs[currentTerritoryIndex] 
-          ? conquestOdds.defensiveHoldoffs[currentTerritoryIndex] + value * chance + battleOdds.defensiveVictory * chance
-          : value * chance + battleOdds.defensiveVictory * chance;
+
+        // add to defensive holdoffs
+        if (offBattalions + territoryList[0].desiredOccupiers === 2)
+          conquestOdds.defensiveHoldoffs[currentTerritoryIndex] = conquestOdds.defensiveHoldoffs[currentTerritoryIndex] 
+            ? conquestOdds.defensiveHoldoffs[currentTerritoryIndex] + value * chance + battleOdds.defensiveVictory * chance
+            : value * chance + battleOdds.defensiveVictory * chance;
 
       // else run remaining battles
       } else {
