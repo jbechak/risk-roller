@@ -155,7 +155,7 @@ h3 {
 
 @media only screen and (max-width: 500px) {
   h4 {
-    font-size: 17px;
+    font-size: 15px;
   }
 }
 </style>
