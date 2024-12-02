@@ -152,4 +152,10 @@ watch(
 h3 {
   margin-bottom: 0px;
 }
+
+@media only screen and (max-width: 500px) {
+  h4 {
+    font-size: 17px;
+  }
+}
 </style>
