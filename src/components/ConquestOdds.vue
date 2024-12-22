@@ -29,7 +29,7 @@
       <label class="w-8"></label>
       <label class="w-45 text-start enemy-table-header">Territory Name</label>
       <label class="w-21 text-start enemy-table-header">Defensive Battalions</label>
-      <label class="w-21 text-start enemy-table-header">Desired # of Occupiers</label>
+      <label class="w-21 text-start enemy-table-header">Desired Occupiers</label>
       <label class="w-5"></label>
     </div>
     <Sortable
@@ -243,7 +243,7 @@ const validationSchema = yup.object().shape({
   enemyTerritoryList: yup.array()
     .test(
       'tooManyOccupiers',
-      'Desired # of Occupiers exceeds Offensive Battalions',
+      'Desired Occupiers exceeds Offensive Battalions',
       (value) => value.map(i=>i.desiredOccupiers).reduce((a, b) => a + b) <= formData.offensiveBattalions
     )
     .nullable()
@@ -255,7 +255,7 @@ const validationSchema = yup.object().shape({
           (value, context) => value || context.parent.placeholder
         ),
       defensiveBattalions: yup.number().nullable().required().positive().max(200).label('Defensive Battalions'),
-      desiredOccupiers: yup.number().nullable().required().positive().max(200).label('Desired # of Occupiers')
+      desiredOccupiers: yup.number().nullable().required().positive().max(200).label('Desired Occupiers')
   }))
 });
 
@@ -329,7 +329,7 @@ function validateForm() {
 
 @media only screen and (max-width: 500px) {
   .enemy-table-header {
-    font-size: 13px;
+    font-size: 15px;
   }
 }
 </style>
