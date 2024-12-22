@@ -329,7 +329,7 @@ function validateForm() {
 
 @media only screen and (max-width: 500px) {
   .enemy-table-header {
-    font-size: 15px;
+    font-size: 14px;
   }
 }
 </style>
