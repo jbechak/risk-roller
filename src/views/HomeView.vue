@@ -198,7 +198,7 @@ watch(
   box-shadow: 0px 0px 0px 5px rgba(0,0,0,0.3);
 }
 
-@media only screen and (min-width: 501px) {
+@media only screen and (min-width: 500px) {
   .home {
     background-image: url('@/assets/highly-blurred-map.png');
     width: 100%;

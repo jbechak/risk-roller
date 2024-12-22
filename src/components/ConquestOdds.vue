@@ -27,9 +27,9 @@
     <h3 class="text-start">Enemy Territories</h3>
     <div d-flex>
       <label class="w-8"></label>
-      <label class="w-45 text-start">Territory Name</label>
-      <label class="w-21 text-start">Defensive Battalions</label>
-      <label class="w-21 text-start">Desired # of Occupiers</label>
+      <label class="w-45 text-start enemy-table-header">Territory Name</label>
+      <label class="w-21 text-start enemy-table-header">Defensive Battalions</label>
+      <label class="w-21 text-start enemy-table-header">Desired # of Occupiers</label>
       <label class="w-5"></label>
     </div>
     <Sortable
@@ -41,7 +41,7 @@
       <template #item="{element}">
         <div v-if="!element.isDeleted" class="draggable d-flex" :key="element.id">
           <font-awesome-icon 
-            class="pt-1 pe-1 w-8 sort-icon"
+            class="pt-1 pe-0 w-8 sort-icon"
             size="xl" 
             icon="sort"
           />
@@ -82,7 +82,7 @@
 
     <div class="d-flex">
       <font-awesome-icon 
-        class="pt-1 pe-1 w-8 opacity-0"
+        class="pt-1 pe-0 w-8 opacity-0"
         size="xl" 
         icon="sort"
       />
@@ -325,5 +325,11 @@ function validateForm() {
 
 .opacity-25 {
   opacity: 25% !important;
+}
+
+@media only screen and (max-width: 500px) {
+  .enemy-table-header {
+    font-size: 13px;
+  }
 }
 </style>
